@@ -24,6 +24,13 @@ export interface RouteContract {
 	/** A Zod schema, `"none"` when the route takes no JSON body, or omitted for reads. */
 	readonly body?: z.ZodType | "none";
 	readonly bodyComponent?: string;
+	/**
+	 * False when an empty body is valid and parses as `{}`. Set only for a
+	 * schema body. Omitted means the body is required.
+	 */
+	readonly bodyRequired?: boolean;
+	/** Extra success statuses that share `response` (for example heal's 202). */
+	readonly alsoSuccessStatuses?: readonly number[];
 	/** Success media type. JSON when omitted. */
 	readonly contentType?: string;
 }
@@ -49,6 +56,9 @@ export function defineRoute(
 		readonly body?: z.ZodType | "none";
 		readonly bodyComponent?: string;
 		readonly bodyDescription?: string;
+		/** False when the handler accepts an empty body (`readJsonBodyOrEmpty`). */
+		readonly bodyRequired?: boolean;
+		readonly alsoSuccessStatuses?: readonly number[];
 		readonly contentType?: string;
 	},
 ): RouteContract {
@@ -75,6 +85,12 @@ export function defineRoute(
 		responseComponent: input.responseComponent,
 		...(body !== undefined ? { body } : {}),
 		...(bodyComponent !== undefined ? { bodyComponent } : {}),
+		...(body !== undefined && body !== "none"
+			? { bodyRequired: input.bodyRequired !== false }
+			: {}),
+		...(input.alsoSuccessStatuses !== undefined
+			? { alsoSuccessStatuses: input.alsoSuccessStatuses }
+			: {}),
 		...(input.contentType !== undefined ? { contentType: input.contentType } : {}),
 	};
 	routes.set(key, contract);

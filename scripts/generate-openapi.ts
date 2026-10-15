@@ -162,22 +162,24 @@ function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOp
 		ok.content = { [media]: { schema: componentRef(contract.responseComponent) } };
 	}
 	const successStatus = String(contract?.successStatus ?? 200);
+	const responses: Record<string, OpenApiResponse> = { [successStatus]: ok };
+	for (const status of contract?.alsoSuccessStatuses ?? []) {
+		responses[String(status)] = { ...ok };
+	}
+	// Range response: the route table does not list a status per
+	// failure. `src/server/errors.ts` maps client failures onto
+	// these codes, and every one of them uses the error envelope.
+	responses["4XX"] = errorResponse(
+		"Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.",
+	);
+	responses.default = errorResponse(
+		"Any other error, including a 500 internal error. The body is the error envelope.",
+	);
 	const op: OpenApiOperation = {
 		operationId: route.handler,
 		tags: [tagFor(route.pattern)],
 		summary: `${route.method} ${route.pattern}`,
-		responses: {
-			[successStatus]: ok,
-			// Range response: the route table does not list a status per
-			// failure. `src/server/errors.ts` maps client failures onto
-			// these codes, and every one of them uses the error envelope.
-			"4XX": errorResponse(
-				"Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.",
-			),
-			default: errorResponse(
-				"Any other error, including a 500 internal error. The body is the error envelope.",
-			),
-		},
+		responses,
 	};
 	if (route.comment) op.description = route.comment;
 	if (contract?.body === "none") {
@@ -191,8 +193,10 @@ function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOp
 	}
 	if (parameters.length > 0) op.parameters = parameters;
 	if (contract?.bodyComponent !== undefined) {
+		const optional = contract.bodyRequired === false;
 		op.requestBody = {
-			required: true,
+			required: !optional,
+			...(optional ? { description: "The JSON body is optional. An empty body is valid." } : {}),
 			content: { "application/json": { schema: componentRef(contract.bodyComponent) } },
 		};
 	}

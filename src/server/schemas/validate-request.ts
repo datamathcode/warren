@@ -36,7 +36,7 @@ export async function enforceRequestBody(
 ): Promise<Response | null> {
 	const contract = routeContract(route.method, route.pattern);
 	if (contract?.body === undefined) return null;
-	const issues = await collectIssues(contract.body, request);
+	const issues = await collectIssues(contract.body, request, contract.bodyRequired !== false);
 	if (issues.length === 0) return null;
 	const routeLabel = `${route.method} ${route.pattern}`;
 	for (const issue of issues) {
@@ -54,7 +54,11 @@ export async function enforceRequestBody(
 	return null;
 }
 
-async function collectIssues(body: z.ZodType | "none", request: Request): Promise<FieldIssue[]> {
+async function collectIssues(
+	body: z.ZodType | "none",
+	request: Request,
+	bodyRequired: boolean,
+): Promise<FieldIssue[]> {
 	if (declaresOversizedBody(request)) return [{ field: "$", errorType: "too_big" }];
 	let raw: string;
 	try {
@@ -63,7 +67,9 @@ async function collectIssues(body: z.ZodType | "none", request: Request): Promis
 		return [{ field: "$", errorType: "validator_error" }];
 	}
 	if (body === "none") return issuesForAbsentBody(raw);
-	if (raw.length === 0) return [{ field: "$", errorType: "invalid_type" }];
+	// Handlers that call `readJsonBodyOrEmpty` treat a missing body as `{}`.
+	if (raw.length === 0)
+		return bodyRequired ? [{ field: "$", errorType: "invalid_type" }] : parseBody(body, {});
 	let parsed: unknown;
 	try {
 		parsed = JSON.parse(raw);
@@ -71,7 +77,11 @@ async function collectIssues(body: z.ZodType | "none", request: Request): Promis
 		return [{ field: "$", errorType: "invalid_json" }];
 	}
 	if (!isJsonObject(parsed)) return [{ field: "$", errorType: "invalid_type" }];
-	const result = body.safeParse(parsed);
+	return parseBody(body, parsed);
+}
+
+function parseBody(body: z.ZodType, value: unknown): FieldIssue[] {
+	const result = body.safeParse(value);
 	if (result.success) return [];
 	return issuesFromZod(result.error);
 }

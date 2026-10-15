@@ -244,8 +244,8 @@ describe("generate-openapi", () => {
 		const routes = extractRoutes(source);
 		const contracts = definedRouteContracts();
 		expect(routes.length).toBe(55);
-		expect(contracts.length).toBe(37);
-		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(4);
+		expect(contracts.length).toBe(51);
+		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(18);
 		const doc = buildDocument(routes, "0.0.0");
 		let postRoutes = 0;
 		let postBodies = 0;
@@ -255,7 +255,23 @@ describe("generate-openapi", () => {
 			if (item.post.requestBody !== undefined) postBodies += 1;
 		}
 		expect(postRoutes).toBe(17);
-		expect(postBodies).toBe(4);
+		expect(postBodies).toBe(17);
+		const heal = doc.paths["/alerts/heal"]?.post;
+		expect(heal?.responses["200"]?.content?.["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/HealAlertResponse",
+		});
+		expect(heal?.responses["202"]?.content?.["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/HealAlertResponse",
+		});
+		expect(heal?.requestBody?.required).toBe(true);
+		const refresh = doc.paths["/projects/{id}/refresh"]?.post?.requestBody;
+		expect(refresh?.required).toBe(false);
+		expect(refresh?.description).toBe("The JSON body is optional. An empty body is valid.");
+		const removed = doc.paths["/projects/{id}"]?.delete?.requestBody;
+		expect(removed?.required).toBe(false);
+		expect(removed?.content["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/NoRequestBody",
+		});
 		const cancel = doc.paths["/plan-runs/{id}/cancel"]?.post?.requestBody;
 		expect(cancel?.required).toBe(false);
 		expect(cancel?.description).toBe("This operation takes no JSON body.");
@@ -266,10 +282,10 @@ describe("generate-openapi", () => {
 
 	test("unknown routes keep a permissive 200 with no body schema", () => {
 		const doc = buildDocument(
-			[{ method: "POST", pattern: "/runs/:id/steer", handler: "steerRunHandler" }],
+			[{ method: "POST", pattern: "/not-a-real-route", handler: "missingHandler" }],
 			"0.0.0",
 		);
-		const ok = doc.paths["/runs/{id}/steer"]?.post?.responses["200"];
+		const ok = doc.paths["/not-a-real-route"]?.post?.responses["200"];
 		expect(ok?.description).toBe("Successful response.");
 		expect(ok?.content).toBeUndefined();
 	});

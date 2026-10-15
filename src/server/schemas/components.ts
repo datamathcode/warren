@@ -13,6 +13,8 @@ import {
 	AGENT_SOURCES,
 	CLONE_KINDS,
 	EVENT_STREAMS,
+	INBOX_PRIORITIES,
+	INBOX_STATES,
 	PLAN_RUN_CHILD_STATES,
 	PLAN_RUN_SOURCES,
 	PLAN_RUN_STATES,
@@ -204,3 +206,18 @@ export const sandboxSchema = z.strictObject({
 	id: z.string(),
 	workspacePath: z.string(),
 });
+
+export const inboxMessageSchema = publish(
+	"InboxMessage",
+	z.strictObject({
+		id: z.string(),
+		runId: z.string().nullable(),
+		body: z.string(),
+		priority: z.enum(INBOX_PRIORITIES),
+		fromActor: z.string(),
+		state: z.enum(INBOX_STATES),
+		createdAt: z.string(),
+		deliveredAt: z.string().nullable(),
+	}),
+	"A steering message on a run.",
+);

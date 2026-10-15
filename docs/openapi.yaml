@@ -118,6 +118,16 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealAlertResponse'
+        '202':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealAlertResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -133,6 +143,12 @@ paths:
       description: >-
         warren-3db0: closed-loop alert intake. Token-gated via the standard bearer gate (not
         auth-exempt); webhook senders carry the bearer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealAlertRequest'
   /analytics/behavior:
     get:
       operationId: listBehaviorAnalyticsHandler
@@ -693,6 +709,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumePlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -705,6 +725,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -830,6 +858,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -842,6 +874,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -857,6 +897,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigMigrateResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -869,6 +913,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -882,8 +934,12 @@ paths:
         - projects
       summary: POST /projects/:id/init
       responses:
-        '200':
+        '201':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitProjectResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -906,6 +962,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitProjectRequest'
   /projects/{id}/ready-plans:
     get:
       operationId: listReadyPlansHandler
@@ -946,6 +1009,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshProjectResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -964,6 +1031,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshProjectRequest'
   /projects/{id}/seeds/plans:
     get:
       operationId: listProjectSeedPlansHandler
@@ -1070,8 +1144,12 @@ paths:
         - projects
       summary: POST /projects/:id/triggers/:triggerId/run
       responses:
-        '200':
+        '201':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1084,6 +1162,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -1246,6 +1332,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1264,6 +1354,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRunRequest'
   /runs/{id}/events:
     get:
       operationId: streamRunEventsHandler
@@ -1340,6 +1437,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeResultResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1358,6 +1459,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeResultRequest'
   /runs/{id}/git-credential:
     post:
       operationId: postRunGitCredentialHandler
@@ -1367,6 +1474,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitCredentialResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1382,7 +1493,14 @@ paths:
       description: >-
         warren-c9ac: the in-pod credential re-mint (forge-contract.md §4.1 window 3) — the pod
         requests a freshly-minted push credential over the same authenticated callback channel
-        instead of trusting the mounted Secret.
+        instead of trusting the mounted Secret. This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -1436,6 +1554,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewLoginResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1458,6 +1580,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewLoginRequest'
   /runs/{id}/preview/teardown:
     post:
       operationId: previewTeardownHandler
@@ -1467,6 +1596,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTeardownResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1485,6 +1618,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewTeardownRequest'
   /runs/{id}/salvage:
     post:
       operationId: postRunSalvageHandler
@@ -1494,6 +1634,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalvageResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1516,6 +1660,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalvageRequest'
   /runs/{id}/steer:
     post:
       operationId: steerRunHandler
@@ -1525,6 +1675,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SteerRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1543,6 +1697,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SteerRunRequest'
   /setup:
     get:
       operationId: setupHandoffHandler
@@ -2436,12 +2596,65 @@ components:
         - cancelledChild
         - alreadyTerminal
       additionalProperties: false
+    CancelRunRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+      additionalProperties: false
+    CancelRunResponse:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/RunState'
+        alreadyTerminal:
+          type: boolean
+        sandboxRun:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                state:
+                  $ref: '#/components/schemas/RunState'
+              required:
+                - id
+                - state
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - state
+        - alreadyTerminal
+        - sandboxRun
+      additionalProperties: false
     CloneKind:
       type: string
       enum:
         - replicate
         - continue
         - rescue
+    ConfigMigrateResponse:
+      type: object
+      properties:
+        projectId:
+          type: string
+        migrated:
+          type: object
+          properties:
+            written:
+              type: array
+              items:
+                type: string
+            previewHoisted:
+              type: boolean
+          required:
+            - written
+            - previewHoisted
+          additionalProperties: false
+      required:
+        - projectId
+        - migrated
+      additionalProperties: false
     CostAnalytics:
       type: object
       properties:
@@ -3053,6 +3266,135 @@ components:
         - intent
       additionalProperties: false
       description: The parked finalize intent, or null until reap parks one. Extra intent fields are allowed.
+    FinalizeResultRequest:
+      type: object
+      properties:
+        version:
+          type: number
+          const: 1
+        attemptId:
+          type: string
+          minLength: 1
+        result:
+          type: object
+          properties:
+            pushed:
+              type: boolean
+            commitsAhead:
+              anyOf:
+                - type: number
+                - type: 'null'
+            commitsAheadBase:
+              anyOf:
+                - type: string
+                - type: 'null'
+            emptyPush:
+              type: boolean
+            dirty:
+              type: boolean
+            dirtyPaths:
+              type: array
+              items:
+                type: string
+            workspacePlansBody:
+              anyOf:
+                - type: string
+                - type: 'null'
+            events:
+              type: array
+              items:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                    minLength: 1
+                  payload: {}
+                required:
+                  - kind
+                additionalProperties: {}
+            artifacts:
+              type: object
+              propertyNames:
+                type: string
+              additionalProperties:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          minLength: 1
+                        mergedBody:
+                          type: string
+                      required:
+                        - path
+                        - mergedBody
+                      additionalProperties: {}
+                  counts:
+                    type: object
+                    propertyNames:
+                      type: string
+                    additionalProperties:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                required:
+                  - files
+                additionalProperties: {}
+            prBranch:
+              anyOf:
+                - type: string
+                - type: 'null'
+            stages:
+              type: array
+              items:
+                type: object
+                properties:
+                  stage:
+                    type: string
+                    minLength: 1
+                  status:
+                    type: string
+                    enum:
+                      - ok
+                      - skipped
+                      - failed
+                  error:
+                    type: string
+                required:
+                  - stage
+                  - status
+                additionalProperties: {}
+          required:
+            - pushed
+            - commitsAhead
+            - emptyPush
+            - dirty
+            - events
+            - stages
+          additionalProperties: {}
+      required:
+        - version
+        - attemptId
+        - result
+      additionalProperties: {}
+      description: In-pod finalize envelope. Unknown keys are ignored. Version is 1.
+    FinalizeResultResponse:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+            - accepted
+            - duplicate
+            - stale
+            - unknown
+      required:
+        - outcome
+      additionalProperties: false
     ForgeRepos:
       type: object
       properties:
@@ -3112,6 +3454,68 @@ components:
       required:
         - run
       additionalProperties: false
+    GitCredentialResponse:
+      type: object
+      properties:
+        gitToken:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - gitToken
+      additionalProperties: false
+      description: A freshly minted git credential, or null when the forge mints anonymously.
+    HealAlertRequest:
+      type: object
+      properties: {}
+      additionalProperties: {}
+      description: Webhook JSON. The source query parameter selects sentry or grafana.
+    HealAlertResponse:
+      oneOf:
+        - type: object
+          properties:
+            status:
+              type: string
+              const: skipped
+            reason:
+              type: string
+            fingerprint:
+              type: string
+            source:
+              type: string
+              enum:
+                - sentry
+                - grafana
+          required:
+            - status
+            - reason
+            - fingerprint
+            - source
+          additionalProperties: false
+        - type: object
+          properties:
+            status:
+              type: string
+              const: dispatched
+            runId:
+              type: string
+            fingerprint:
+              type: string
+            projectId:
+              type: string
+            source:
+              type: string
+              enum:
+                - sentry
+                - grafana
+          required:
+            - status
+            - runId
+            - fingerprint
+            - projectId
+            - source
+          additionalProperties: false
+      description: 200 when the alert is skipped. 202 when a healer run is dispatched. Both use this body.
     Healthz:
       type: object
       properties:
@@ -3124,6 +3528,92 @@ components:
     HtmlPage:
       type: string
       description: An HTML page. The success body is not JSON.
+    InboxMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        runId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        body:
+          type: string
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+        fromActor:
+          type: string
+        state:
+          type: string
+          enum:
+            - unread
+            - delivered
+            - failed
+        createdAt:
+          type: string
+        deliveredAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - runId
+        - body
+        - priority
+        - fromActor
+        - state
+        - createdAt
+        - deliveredAt
+      additionalProperties: false
+      description: A steering message on a run.
+    InitProjectRequest:
+      type: object
+      properties:
+        defaultRole:
+          type: string
+        defaultPrompt:
+          type: string
+        defaultProvider:
+          type: string
+        defaultModel:
+          type: string
+        defaultBranch:
+          type: string
+        runBranchPrefix:
+          type: string
+        overwrite:
+          type: boolean
+      additionalProperties: false
+      description: Optional scaffold defaults. An empty body writes an empty defaults block.
+    InitProjectResponse:
+      type: object
+      properties:
+        projectId:
+          type: string
+        scaffolded:
+          type: object
+          properties:
+            files:
+              type: array
+              items:
+                type: string
+            defaultRole:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - files
+            - defaultRole
+          additionalProperties: false
+      required:
+        - projectId
+        - scaffolded
+      additionalProperties: false
     InstanceFacts:
       type: object
       properties:
@@ -3509,6 +3999,20 @@ components:
         - host
         - port
       additionalProperties: false
+    PreviewLoginRequest:
+      type: object
+      properties:
+        redirect:
+          type: string
+      additionalProperties: false
+    PreviewLoginResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+      additionalProperties: false
     PreviewState:
       type: string
       enum:
@@ -3516,6 +4020,38 @@ components:
         - live
         - failed
         - torn-down
+    PreviewTeardownRequest:
+      type: object
+      properties:
+        actor:
+          type: string
+      additionalProperties: false
+    PreviewTeardownResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - torn-down
+            - already-torn-down
+            - already-failed
+            - never-launched
+        tornDown:
+          type: boolean
+        previousState:
+          anyOf:
+            - $ref: '#/components/schemas/PreviewState'
+            - type: 'null'
+        port:
+          anyOf:
+            - type: integer
+            - type: 'null'
+      required:
+        - status
+        - tornDown
+        - previousState
+        - port
+      additionalProperties: false
     Project:
       type: object
       properties:
@@ -3846,6 +4382,57 @@ components:
       description: >-
         Readiness. A failed check answers 503 with this same body; the document's success status is
         the ready case.
+    RefreshProjectRequest:
+      type: object
+      properties:
+        ref:
+          type: string
+      additionalProperties: false
+      description: Optional. `ref` overrides the project's default branch.
+    RefreshProjectResponse:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+        headSha:
+          type: string
+        ref:
+          type: string
+      required:
+        - project
+        - headSha
+        - ref
+      additionalProperties: false
+    ResumePlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        reason:
+          type: string
+          enum:
+            - child_pr_merge_timeout
+            - parent_pr_merge_timeout
+        resumedChild:
+          anyOf:
+            - type: object
+              properties:
+                seq:
+                  type: integer
+                runId:
+                  anyOf:
+                    - type: string
+                    - type: 'null'
+              required:
+                - seq
+                - runId
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - planRun
+        - reason
+        - resumedChild
+      additionalProperties: false
     Run:
       type: object
       properties:
@@ -5237,47 +5824,7 @@ components:
         messages:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: string
-              runId:
-                anyOf:
-                  - type: string
-                  - type: 'null'
-              body:
-                type: string
-              priority:
-                type: string
-                enum:
-                  - low
-                  - normal
-                  - high
-                  - urgent
-              fromActor:
-                type: string
-              state:
-                type: string
-                enum:
-                  - unread
-                  - delivered
-                  - failed
-              createdAt:
-                type: string
-              deliveredAt:
-                anyOf:
-                  - type: string
-                  - type: 'null'
-            required:
-              - id
-              - runId
-              - body
-              - priority
-              - fromActor
-              - state
-              - createdAt
-              - deliveredAt
-            additionalProperties: false
+            $ref: '#/components/schemas/InboxMessage'
       required:
         - messages
       additionalProperties: false
@@ -5293,6 +5840,82 @@ components:
         - succeeded
         - failed
         - cancelled
+    SalvageRequest:
+      type: object
+      properties:
+        version:
+          type: number
+          const: 1
+        trigger:
+          type: string
+          enum:
+            - push_failed
+            - no_intent
+            - empty_push_dirty
+        rescueRef:
+          anyOf:
+            - type: string
+            - type: 'null'
+        bundleBase64:
+          anyOf:
+            - type: string
+            - type: 'null'
+        branch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        notes:
+          type: array
+          items:
+            type: string
+      required:
+        - version
+        - trigger
+      additionalProperties: {}
+      description: In-pod salvage envelope. Unknown keys are ignored. Version is 1.
+    SalvageResponse:
+      type: object
+      properties:
+        stored:
+          type: boolean
+        rescueRef:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - stored
+        - rescueRef
+      additionalProperties: false
+    SteerRunRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+        fromActor:
+          type: string
+      required:
+        - body
+      additionalProperties: false
+    SteerRunResponse:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/InboxMessage'
+      required:
+        - message
+      additionalProperties: false
     Version:
       type: object
       properties:

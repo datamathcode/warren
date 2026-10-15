@@ -4,8 +4,8 @@
  */
 
 import * as z from "zod";
-import { INBOX_PRIORITIES, INBOX_STATES, ISSUE_STATUSES, PLAN_STATUSES } from "../../core/wire.ts";
-import { agentSchema } from "./components.ts";
+import { ISSUE_STATUSES, PLAN_STATUSES } from "../../core/wire.ts";
+import { agentSchema, inboxMessageSchema } from "./components.ts";
 import { defineRoute, type RouteContract } from "./registry.ts";
 
 const htmlPage = z.string().meta({
@@ -202,19 +202,8 @@ const projectSeed = defineRoute("GET", "/projects/:id/seeds/:seedId", {
 	responseComponent: "ProjectSeed",
 });
 
-const inboxMessage = z.strictObject({
-	id: z.string(),
-	runId: z.string().nullable(),
-	body: z.string(),
-	priority: z.enum(INBOX_PRIORITIES),
-	fromActor: z.string(),
-	state: z.enum(INBOX_STATES),
-	createdAt: z.string(),
-	deliveredAt: z.string().nullable(),
-});
-
 const runInbox = defineRoute("GET", "/runs/:id/inbox", {
-	response: z.strictObject({ messages: z.array(inboxMessage) }),
+	response: z.strictObject({ messages: z.array(inboxMessageSchema) }),
 	responseComponent: "RunInbox",
 });
 

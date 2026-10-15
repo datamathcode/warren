@@ -223,6 +223,17 @@ describe("enforceRequestBody", () => {
 		expect(lines.some((line) => line.level === "warn")).toBe(false);
 	});
 
+	test("an empty optional body matches the schema", async () => {
+		const { logger, lines } = makeRecordingLogger();
+		const result = await enforceRequestBody(
+			{ method: "POST", pattern: "/projects/:id/refresh" },
+			new Request("http://warren.test/projects/p1/refresh", { method: "POST" }),
+			logger,
+		);
+		expect(result).toBeNull();
+		expect(lines).toEqual([]);
+	});
+
 	test("skips routes that have no published body schema", async () => {
 		const { logger, lines } = makeRecordingLogger();
 		const result = await enforceRequestBody(
