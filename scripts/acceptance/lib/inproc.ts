@@ -136,7 +136,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 		dataDir,
 		env,
 		stop: async () => {
-			await stopChild(state.warren);
+			await stopSpawned(state.warren);
 			state.warren = undefined;
 			try {
 				await rm(tmpRoot, { recursive: true, force: true });
@@ -145,7 +145,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 			}
 		},
 		killWarren: async () => {
-			await stopChild(state.warren);
+			await stopSpawned(state.warren);
 			state.warren = undefined;
 		},
 		restartWarren: async () => {
@@ -175,9 +175,9 @@ interface ProcState {
 function spawnWarren(serverEntry: string, env: Record<string, string>): SpawnedProc {
 	// `bun` on PATH may be a package-manager shim. Signaling that shim
 	// reaps the shim and leaves the real interpreter holding the port.
-	// execPath is the binary running this process. detached makes it the
-	// process-group leader so stopChild can signal the whole group.
-	return spawnCaptured([process.execPath, "run", serverEntry], env, { detached: true });
+	// execPath is the binary running this process. spawnCaptured detaches
+	// it so stopSpawned can signal the whole group.
+	return spawnCaptured([process.execPath, "run", serverEntry], env);
 }
 
 /**
@@ -223,20 +223,27 @@ async function drainInto(stream: ReadableStream<Uint8Array>, capture: TailCaptur
  * opts a stream back into live `inherit` passthrough. Captured output is
  * surfaced by {@link waitForHealthzWithDiagnostics} when the boot fails.
  */
-export function spawnCaptured(
-	cmd: readonly string[],
-	env?: Record<string, string>,
-	opts?: { readonly detached?: boolean },
-): SpawnedProc {
+/**
+ * `bun` on PATH may be a package-manager shim. Always invoke the binary
+ * that is running this process, in its own session, so a later group
+ * signal reaches the interpreter and any child it spawned.
+ */
+function capturedCommand(cmd: readonly string[]): string[] {
+	const [bin, ...rest] = cmd;
+	const executable = bin === "bun" || bin === undefined ? process.execPath : bin;
+	return [executable, ...rest];
+}
+
+export function spawnCaptured(cmd: readonly string[], env?: Record<string, string>): SpawnedProc {
 	const stdoutLive = process.env.WARREN_ACCEPTANCE_WARREN_STDOUT === "1";
 	const stderrLive = process.env.WARREN_ACCEPTANCE_WARREN_STDERR === "1";
 	const proc = Bun.spawn({
-		cmd: [...cmd],
+		cmd: capturedCommand(cmd),
 		...(env !== undefined ? { env } : {}),
 		stdin: "ignore",
 		stdout: stdoutLive ? "inherit" : "pipe",
 		stderr: stderrLive ? "inherit" : "pipe",
-		detached: opts?.detached === true,
+		detached: true,
 	});
 	const stdoutTail = new TailCapture();
 	const stderrTail = new TailCapture();
@@ -351,10 +358,10 @@ async function waitUntilGroupGone(pid: number): Promise<void> {
 
 /**
  * SIGTERM the process group, SIGKILL it after the grace period, and
- * return only once the group is gone. `stop()` and `killWarren()` both
- * come through here.
+ * return only once the group is gone. `stop()`, `killWarren()`, and the
+ * harness tests all come through here.
  */
-async function stopChild(child: SpawnedProc | undefined): Promise<void> {
+export async function stopSpawned(child: SpawnedProc | undefined): Promise<void> {
 	if (child === undefined) return;
 	const pid = child.proc.pid;
 	signalGroup(pid, "SIGTERM");
