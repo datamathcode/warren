@@ -1,11 +1,10 @@
 /**
  * Request-body check for routes that publish a Zod schema.
  *
- * Starts in log-only mode: a mismatch is recorded and the handler still
- * runs. The field value, the raw body, and unknown key names are never
+ * A mismatch is logged and answered with HTTP 400. The handler does not
+ * run. The field value, the raw body, and unknown key names are never
  * logged — a client-chosen key name can itself be a secret. An unknown
- * key is recorded only as a count. The switch to HTTP 400 is
- * `REQUEST_BODY_VALIDATION_MODE`.
+ * key is recorded only as a count.
  */
 
 import type * as z from "zod";
@@ -15,7 +14,7 @@ import type { Logger } from "../types.ts";
 import { routeContract } from "./registry.ts";
 
 /** `"log"` records mismatches. `"reject"` answers 400 and does not call the handler. */
-export const REQUEST_BODY_VALIDATION_MODE: "log" | "reject" = "log";
+export const REQUEST_BODY_VALIDATION_MODE: "log" | "reject" = "reject";
 
 export interface FieldIssue {
 	readonly field: string;
@@ -25,9 +24,9 @@ export interface FieldIssue {
 }
 
 /**
- * Returns a 400 response when validation mode is `"reject"` and the body
- * does not match. Log-only mode always returns null after recording the
- * mismatch. Routes with no published body schema are skipped.
+ * Returns a 400 response when the body does not match. Routes with no
+ * published body schema are skipped. `"log"` mode records the mismatch
+ * and returns null so the handler still runs.
  */
 export async function enforceRequestBody(
 	route: { readonly method: string; readonly pattern: string },

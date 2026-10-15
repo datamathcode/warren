@@ -24,8 +24,8 @@ describe("enforceRequestBody", () => {
 		db = null;
 	});
 
-	test("logs the field path and error type and still runs the handler", async () => {
-		expect(REQUEST_BODY_VALIDATION_MODE).toBe("log");
+	test("rejects a mismatched body and does not run the handler", async () => {
+		expect(REQUEST_BODY_VALIDATION_MODE).toBe("reject");
 		db = await openDatabase({ path: ":memory:" });
 		const repos = createRepos(db);
 		const project = await repos.projects.create({
@@ -59,7 +59,14 @@ describe("enforceRequestBody", () => {
 			headers: { "content-type": "application/json" },
 			body: JSON.stringify({ [KEY_NAME_MARKER]: secret }),
 		});
-		expect(res.status).toBe(200);
+		expect(res.status).toBe(400);
+		const text = await res.text();
+		expect(text).not.toContain(secret);
+		expect(text).not.toContain(KEY_NAME_MARKER);
+		const rejected = JSON.parse(text) as { error: { code: string; message: string } };
+		expect(rejected.error.code).toBe("validation_error");
+		expect(rejected.error.message).toContain("$ (unrecognized_keys count 1)");
+		expect((await repos.planRuns.require(created.planRun.id)).state).toBe("queued");
 		const warnings = lines.filter((line) => line.level === "warn");
 		expect(warnings.length).toBeGreaterThan(0);
 		expect(JSON.stringify(lines)).not.toContain(secret);
@@ -93,7 +100,10 @@ describe("enforceRequestBody", () => {
 			}),
 			logger,
 		);
-		expect(bad).toBeNull();
+		const badMessage = await expectRejection(bad);
+		expect(badMessage).not.toContain(secret);
+		expect(badMessage).not.toContain(KEY_NAME_MARKER);
+		expect(badMessage).toContain("unrecognized_keys count 1");
 		expect(JSON.stringify(lines)).not.toContain(secret);
 		expect(JSON.stringify(lines)).not.toContain(KEY_NAME_MARKER);
 		expect(
@@ -112,7 +122,9 @@ describe("enforceRequestBody", () => {
 			}),
 			logger,
 		);
-		expect(typed).toBeNull();
+		const typedMessage = await expectRejection(typed);
+		expect(typedMessage).not.toContain("12");
+		expect(typedMessage).toContain("gitUrl (invalid_type)");
 		expect(
 			lines.some((line) => line.obj.field === "gitUrl" && line.obj.errorType === "invalid_type"),
 		).toBe(true);
@@ -139,7 +151,8 @@ describe("enforceRequestBody", () => {
 				new Request("http://warren.test/projects", { method: "POST", body }),
 				logger,
 			);
-			expect(result).toBeNull();
+			const message = await expectRejection(result);
+			expect(message).not.toContain("not-json");
 		}
 		expect(lines.map((line) => line.obj.errorType)).toEqual([
 			"invalid_json",
@@ -167,20 +180,27 @@ describe("enforceRequestBody", () => {
 			),
 		).toBeNull();
 		expect(
-			await enforceRequestBody(
-				route,
-				new Request("http://warren.test/plan-runs/1/cancel", { method: "POST", body: "[]" }),
-				logger,
+			await expectRejection(
+				await enforceRequestBody(
+					route,
+					new Request("http://warren.test/plan-runs/1/cancel", { method: "POST", body: "[]" }),
+					logger,
+				),
 			),
-		).toBeNull();
+		).toContain("invalid_type");
 		expect(lines.map((line) => line.obj.errorType)).toEqual(["invalid_type"]);
 		expect(
-			await enforceRequestBody(
-				route,
-				new Request("http://warren.test/plan-runs/1/cancel", { method: "POST", body: "not-json" }),
-				logger,
+			await expectRejection(
+				await enforceRequestBody(
+					route,
+					new Request("http://warren.test/plan-runs/1/cancel", {
+						method: "POST",
+						body: "not-json",
+					}),
+					logger,
+				),
 			),
-		).toBeNull();
+		).not.toContain("not-json");
 		expect(lines.at(-1)?.obj.errorType).toBe("invalid_json");
 	});
 
@@ -196,7 +216,9 @@ describe("enforceRequestBody", () => {
 			request,
 			logger,
 		);
-		expect(result).toBeNull();
+		const message = await expectRejection(result);
+		expect(message).toContain("too_big");
+		expect(message).not.toContain(KEY_NAME_MARKER);
 		expect(lines.map((line) => line.obj.errorType)).toEqual(["too_big"]);
 		expect(JSON.stringify(lines)).not.toContain(KEY_NAME_MARKER);
 	});
@@ -245,3 +267,12 @@ describe("enforceRequestBody", () => {
 		expect(lines).toEqual([]);
 	});
 });
+
+async function expectRejection(result: Response | null): Promise<string> {
+	expect(result).not.toBeNull();
+	if (result === null) return "";
+	expect(result.status).toBe(400);
+	const body = (await result.json()) as { error?: { code?: string; message?: string } };
+	expect(body.error?.code).toBe("validation_error");
+	return body.error?.message ?? "";
+}
