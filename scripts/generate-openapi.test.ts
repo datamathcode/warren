@@ -12,11 +12,26 @@ import {
 	RUN_FAILURE_REASONS,
 	RUN_STATES,
 } from "../src/core/wire.ts";
+import { extractRoutes } from "./generate-docs.ts";
 import { buildDocument, convertPattern, generate, tagFor } from "./generate-openapi.ts";
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 
 describe("generate-openapi", () => {
+	test("check:all and CI both run the Redocly lint command", () => {
+		const pkg = JSON.parse(readFileSync(resolve(REPO_ROOT, "package.json"), "utf8")) as {
+			scripts: Record<string, string>;
+		};
+		const command = "npx @redocly/cli lint docs/openapi.yaml";
+		expect(pkg.scripts["check:openapi"]).toBe(command);
+		expect(pkg.scripts["check:all"]).toBe("bash scripts/check-all.sh");
+		const ci = readFileSync(resolve(REPO_ROOT, ".github/workflows/ci.yml"), "utf8");
+		expect(ci).toContain(command);
+		const entry = readFileSync(resolve(REPO_ROOT, "scripts/check-all.sh"), "utf8");
+		expect(entry).toContain("bun run check:openapi");
+		expect(entry).toContain('"$@"');
+	});
+
 	test("docs/openapi.yaml is in sync with src/server/handlers/index.ts", () => {
 		const { content } = generate();
 		const onDisk = readFileSync(resolve(REPO_ROOT, "docs/openapi.yaml"), "utf8");
@@ -155,6 +170,54 @@ describe("generate-openapi", () => {
 		});
 	});
 
+	test("document declares the default server, the MIT license, and bearer auth", () => {
+		const doc = buildDocument([], "0.0.0");
+		expect(doc.servers[0]?.url).toBe("http://localhost:8080");
+		expect(doc.info.license).toEqual({ name: "MIT", identifier: "MIT" });
+		expect(doc.security).toEqual([{ bearerAuth: [] }]);
+		expect(doc.components.securitySchemes.bearerAuth.scheme).toBe("bearer");
+	});
+
+	test("anonymous routes opt out of bearer auth and every operation lists a 4XX", () => {
+		const doc = buildDocument(
+			[
+				{ method: "GET", pattern: "/healthz", handler: "healthz", policy: "anonymous" },
+				{ method: "GET", pattern: "/runs", handler: "listRunsHandler", policy: "readPublic" },
+			],
+			"0.0.0",
+		);
+		expect(doc.paths["/healthz"]?.get?.security).toEqual([]);
+		expect(doc.paths["/runs"]?.get?.security).toBeUndefined();
+		const clientError = doc.paths["/runs"]?.get?.responses["4XX"];
+		expect(clientError?.content?.["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/ErrorEnvelope",
+		});
+	});
+
+	test("nullable run enums reference the named component schema", () => {
+		const doc = buildDocument([], "0.0.0");
+		const run = doc.components.schemas.Run as {
+			properties: { failureReason: unknown; cloneKind: unknown };
+		};
+		expect(run.properties.failureReason).toEqual({
+			anyOf: [{ $ref: "#/components/schemas/RunFailureReason" }, { type: "null" }],
+		});
+		expect(run.properties.cloneKind).toEqual({
+			anyOf: [{ $ref: "#/components/schemas/CloneKind" }, { type: "null" }],
+		});
+	});
+
+	test("EventStream is the only component schema the route table does not reference", () => {
+		const source = readFileSync(resolve(REPO_ROOT, "src/server/handlers/route-table.ts"), "utf8");
+		const doc = buildDocument(extractRoutes(source), "0.0.0");
+		const used = new Set<string>();
+		collectSchemaRefs(doc, used);
+		const unused = Object.keys(doc.components.schemas)
+			.filter((name) => !used.has(name))
+			.sort();
+		expect(unused).toEqual(["EventStream"]);
+	});
+
 	test("unknown routes keep a permissive 200 with no body schema", () => {
 		const doc = buildDocument(
 			[{ method: "POST", pattern: "/runs/:id/steer", handler: "steerRunHandler" }],
@@ -165,3 +228,20 @@ describe("generate-openapi", () => {
 		expect(ok?.content).toBeUndefined();
 	});
 });
+
+/** Names of `#/components/schemas/` targets anywhere in the document. */
+function collectSchemaRefs(value: unknown, found: Set<string>): void {
+	if (Array.isArray(value)) {
+		for (const item of value) collectSchemaRefs(item, found);
+		return;
+	}
+	if (value === null || typeof value !== "object") return;
+	for (const [key, child] of Object.entries(value)) {
+		const schemaPrefix = "#/components/schemas/";
+		if (key === "$ref" && typeof child === "string" && child.startsWith(schemaPrefix)) {
+			found.add(child.slice(schemaPrefix.length));
+			continue;
+		}
+		collectSchemaRefs(child, found);
+	}
+}

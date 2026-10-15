@@ -34,6 +34,9 @@ jobs:
       - run: bun run check:agents
       - run: bun run gen:docs:check
       - run: bun run gen:openapi:check
+      # Same command as the check:openapi script. Written out so the job
+      # shows the linter. check:all runs that script after the gates.
+      - run: npx @redocly/cli lint docs/openapi.yaml
       - run: bun run check:size
       - run: bun run check:debt
       - run: bun run check:dups

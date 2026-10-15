@@ -57,6 +57,8 @@ export type Route = {
 	pattern: string;
 	handler: string;
 	comment?: string;
+	/** Capability the route demands, when the entry declares `policy`. */
+	policy?: string;
 };
 
 /**
@@ -175,7 +177,9 @@ function handleCloseBrace(
 	state.pendingComment = undefined;
 }
 
-function parseEntry(text: string): { method: string; pattern: string; handler: string } | null {
+function parseEntry(
+	text: string,
+): { method: string; pattern: string; handler: string; policy?: string } | null {
 	const methodMatch = text.match(/method:\s*"([A-Z]+)"/);
 	const patternMatch = text.match(/pattern:\s*"([^"]+)"/);
 	// `build:` may be `() =>`, `(deps) =>`, or a bare identifier reference.
@@ -185,7 +189,9 @@ function parseEntry(text: string): { method: string; pattern: string; handler: s
 	const pattern = patternMatch[1];
 	const handler = buildMatch[1];
 	if (method === undefined || pattern === undefined || handler === undefined) return null;
-	return { method, pattern, handler };
+	const policy = text.match(/policy:\s*"([^"]+)"/)?.[1];
+	if (policy === undefined) return { method, pattern, handler };
+	return { method, pattern, handler, policy };
 }
 
 /**
