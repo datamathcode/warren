@@ -67,6 +67,29 @@ describe("lowerBudgets", () => {
 	});
 });
 
+/**
+ * Run the guard without writing to the suite's stderr.
+ *
+ * The negative cases print `src/ui/src/pages/a.tsx: 4 > 3 (exceeds its frozen
+ * budget)` and the same line for 5. `check:all` treats "exceeds … budget" as
+ * a failure signature. Left on the suite stderr, a passing test is reported
+ * as a check:coverage failure. The counts stay over the budget of 3; that is
+ * what the guard is supposed to reject. The text is returned so the test can
+ * still see it.
+ */
+function runQuiet(run: () => number): { status: number; stderr: string } {
+	const lines: string[] = [];
+	const prev = console.error;
+	console.error = ((...args: unknown[]) => {
+		lines.push(args.map((arg) => (typeof arg === "string" ? arg : String(arg))).join(" "));
+	}) as typeof console.error;
+	try {
+		return { status: run(), stderr: lines.join("\n") };
+	} finally {
+		console.error = prev;
+	}
+}
+
 describe("check-tailwind-arbitrary on a fixture tree", () => {
 	let root: string;
 	const put = (rel: string, body: string) => {
@@ -96,12 +119,16 @@ describe("check-tailwind-arbitrary on a fixture tree", () => {
 	test("fails when a new file with hits appears", () => {
 		put("src/ui/src/pages/b.tsx", page(1));
 		expect(scan(root).failures.map((f) => f.path)).toEqual(["src/ui/src/pages/b.tsx"]);
-		expect(main([], root)).toBe(1);
+		const ran = runQuiet(() => main([], root));
+		expect(ran.status).toBe(1);
+		expect(ran.stderr).toContain("src/ui/src/pages/b.tsx: 1 > 0");
 	});
 
 	test("fails when a budgeted file grows", () => {
 		put("src/ui/src/pages/a.tsx", page(4));
-		expect(main([], root)).toBe(1);
+		const ran = runQuiet(() => main([], root));
+		expect(ran.status).toBe(1);
+		expect(ran.stderr).toContain("src/ui/src/pages/a.tsx: 4 > 3");
 	});
 
 	test("passes on a decrease, and --update lowers the budget", () => {
@@ -114,7 +141,9 @@ describe("check-tailwind-arbitrary on a fixture tree", () => {
 	test("--update refuses to raise and leaves the budget file untouched", () => {
 		const before = readFileSync(join(root, BUDGETS_REL), "utf8");
 		put("src/ui/src/pages/a.tsx", page(5));
-		expect(main(["--update"], root)).toBe(1);
+		const ran = runQuiet(() => main(["--update"], root));
+		expect(ran.status).toBe(1);
+		expect(ran.stderr).toContain("src/ui/src/pages/a.tsx: 5 > 3");
 		expect(readFileSync(join(root, BUDGETS_REL), "utf8")).toBe(before);
 	});
 
