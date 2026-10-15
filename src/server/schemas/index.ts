@@ -8,6 +8,7 @@ import "./routes-reads.ts";
 import "./routes-reads-analytics.ts";
 import "./routes-writes-projects.ts";
 import "./routes-writes-runs.ts";
+import "./routes-events.ts";
 
 export {
 	componentRef,

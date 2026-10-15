@@ -228,7 +228,7 @@ describe("generate-openapi", () => {
 		});
 	});
 
-	test("EventStream is the only component schema the route table does not reference", () => {
+	test("every published component schema is referenced by a route", () => {
 		const source = readFileSync(resolve(REPO_ROOT, "src/server/handlers/route-table.ts"), "utf8");
 		const doc = buildDocument(extractRoutes(source), "0.0.0");
 		const used = new Set<string>();
@@ -236,7 +236,7 @@ describe("generate-openapi", () => {
 		const unused = Object.keys(doc.components.schemas)
 			.filter((name) => !used.has(name))
 			.sort();
-		expect(unused).toEqual(["EventStream"]);
+		expect(unused).toEqual([]);
 	});
 
 	test("typed coverage counts published response and body schemas", () => {
@@ -244,7 +244,7 @@ describe("generate-openapi", () => {
 		const routes = extractRoutes(source);
 		const contracts = definedRouteContracts();
 		expect(routes.length).toBe(55);
-		expect(contracts.length).toBe(51);
+		expect(contracts.length).toBe(55);
 		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(18);
 		const doc = buildDocument(routes, "0.0.0");
 		let postRoutes = 0;

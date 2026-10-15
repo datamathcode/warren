@@ -262,6 +262,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -286,6 +290,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/LifecycleNotification'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -682,6 +690,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/RunEvent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1370,6 +1382,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/RunEvent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -3235,6 +3251,26 @@ components:
         - error
       additionalProperties: false
       description: Error body for every non-success response.
+    EventList:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunEvent'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - events
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+      description: A page of events. The public projection omits internal rows.
     EventStream:
       type: string
       enum:
@@ -3662,6 +3698,33 @@ components:
         - runtime
         - authMode
       additionalProperties: false
+    LifecycleNotification:
+      type: object
+      properties:
+        runId:
+          type: string
+        hook:
+          type: string
+          enum:
+            - run_dispatched
+            - run_started
+            - event_emitted
+            - pre_reap
+            - post_reap
+            - branch_pushed
+        state:
+          anyOf:
+            - $ref: '#/components/schemas/RunState'
+            - type: 'null'
+        ts:
+          type: string
+      required:
+        - runId
+        - hook
+        - state
+        - ts
+      additionalProperties: false
+      description: One NDJSON line. A closed tail may be empty. A live tail stays open and writes more lines.
     ListAgentsResponse:
       type: object
       properties:
@@ -5797,6 +5860,39 @@ components:
       enum:
         - api
         - subscription_estimate
+    RunEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        runId:
+          type: string
+        seq:
+          type: integer
+        ts:
+          type: string
+        kind:
+          type: string
+        stream:
+          anyOf:
+            - $ref: '#/components/schemas/EventStream'
+            - type: 'null'
+        origin:
+          anyOf:
+            - type: string
+            - type: 'null'
+        payload: {}
+      required:
+        - id
+        - runId
+        - seq
+        - ts
+        - kind
+        - stream
+        - origin
+        - payload
+      additionalProperties: false
+      description: One NDJSON line. A closed tail may be empty. A live tail stays open and writes more lines.
     RunFailureReason:
       type: string
       enum:
