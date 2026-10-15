@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
+import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -212,13 +213,34 @@ describe("seedFixtureDb", () => {
 	});
 });
 
+function freshPortAccepts(port: number): Promise<boolean> {
+	return new Promise((resolve) => {
+		const socket = createConnection({ host: "127.0.0.1", port });
+		let settled = false;
+		const finish = (accepts: boolean): void => {
+			if (settled) return;
+			settled = true;
+			socket.destroy();
+			resolve(accepts);
+		};
+		socket.setTimeout(250);
+		socket.once("connect", () => finish(true));
+		socket.once("timeout", () => finish(false));
+		socket.once("error", () => finish(false));
+	});
+}
+
 describe("FixtureBootHandle.stop", () => {
 	test("shuts warren down and removes the temp root", async () => {
 		const handle = await bootFixture({ uiDistDir: null });
 		const { baseUrl, tmpRoot } = handle.output;
+		const port = Number(new URL(baseUrl).port);
 		expect((await fetch(`${baseUrl}/healthz`)).status).toBe(200);
 		await handle.stop();
-		await expect(fetch(`${baseUrl}/healthz`)).rejects.toThrow();
+		await expect(
+			fetch(`${baseUrl}/healthz`, { headers: { connection: "close" } }),
+		).rejects.toThrow();
+		expect(await freshPortAccepts(port)).toBe(false);
 		expect(existsSync(tmpRoot)).toBe(false);
 		await handle.stop(); // idempotent
 	}, 30_000);

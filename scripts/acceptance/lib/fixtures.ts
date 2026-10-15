@@ -415,6 +415,11 @@ function withGitIdentity(extra: Record<string, string | undefined>): Record<stri
 		GIT_AUTHOR_EMAIL: "acceptance@warren.invalid",
 		GIT_COMMITTER_NAME: "Warren Acceptance",
 		GIT_COMMITTER_EMAIL: "acceptance@warren.invalid",
+		// Fixture repos must not read the operator's global git config.
+		// commit.gpgsign and core.fsmonitor there can block a commit for
+		// the whole helper timeout and blow the fixture-boot stop test.
+		GIT_CONFIG_GLOBAL: "/dev/null",
+		GIT_CONFIG_NOSYSTEM: "1",
 	};
 	for (const [k, v] of Object.entries(extra)) if (v !== undefined) out[k] = v;
 	return out;

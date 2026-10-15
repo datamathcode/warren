@@ -17,6 +17,9 @@ export const FIXTURE_GIT_ENV: Record<string, string> = {
 	GIT_COMMITTER_NAME: "t",
 	GIT_COMMITTER_EMAIL: "t@example.invalid",
 	GIT_CONFIG_NOSYSTEM: "1",
+	// Do not read the operator gitconfig. commit.gpgsign / core.fsmonitor
+	// there can block a fixture commit until the test hook times out.
+	GIT_CONFIG_GLOBAL: "/dev/null",
 };
 
 /** Run fixture git with a scrubbed env (no inherited GIT_DIR etc.). */

@@ -136,7 +136,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 		dataDir,
 		env,
 		stop: async () => {
-			await stopChild(state.warren);
+			await stopSpawned(state.warren);
 			state.warren = undefined;
 			try {
 				await rm(tmpRoot, { recursive: true, force: true });
@@ -145,7 +145,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 			}
 		},
 		killWarren: async () => {
-			await stopChild(state.warren);
+			await stopSpawned(state.warren);
 			state.warren = undefined;
 		},
 		restartWarren: async () => {
@@ -173,7 +173,11 @@ interface ProcState {
 }
 
 function spawnWarren(serverEntry: string, env: Record<string, string>): SpawnedProc {
-	return spawnCaptured(["bun", "run", serverEntry], env);
+	// `bun` on PATH may be a package-manager shim. Signaling that shim
+	// reaps the shim and leaves the real interpreter holding the port.
+	// execPath is the binary running this process. spawnCaptured detaches
+	// it so stopSpawned can signal the whole group.
+	return spawnCaptured([process.execPath, "run", serverEntry], env);
 }
 
 /**
@@ -219,15 +223,27 @@ async function drainInto(stream: ReadableStream<Uint8Array>, capture: TailCaptur
  * opts a stream back into live `inherit` passthrough. Captured output is
  * surfaced by {@link waitForHealthzWithDiagnostics} when the boot fails.
  */
+/**
+ * `bun` on PATH may be a package-manager shim. Always invoke the binary
+ * that is running this process, in its own session, so a later group
+ * signal reaches the interpreter and any child it spawned.
+ */
+function capturedCommand(cmd: readonly string[]): string[] {
+	const [bin, ...rest] = cmd;
+	const executable = bin === "bun" || bin === undefined ? process.execPath : bin;
+	return [executable, ...rest];
+}
+
 export function spawnCaptured(cmd: readonly string[], env?: Record<string, string>): SpawnedProc {
 	const stdoutLive = process.env.WARREN_ACCEPTANCE_WARREN_STDOUT === "1";
 	const stderrLive = process.env.WARREN_ACCEPTANCE_WARREN_STDERR === "1";
 	const proc = Bun.spawn({
-		cmd: [...cmd],
+		cmd: capturedCommand(cmd),
 		...(env !== undefined ? { env } : {}),
 		stdin: "ignore",
 		stdout: stdoutLive ? "inherit" : "pipe",
 		stderr: stderrLive ? "inherit" : "pipe",
+		detached: true,
 	});
 	const stdoutTail = new TailCapture();
 	const stderrTail = new TailCapture();
@@ -289,25 +305,74 @@ function renderTails(child: SpawnedProc): string {
 	return `\n${parts.join("\n\n")}`;
 }
 
-async function stopChild(child: SpawnedProc | undefined): Promise<void> {
-	if (child === undefined) return;
+const STOP_GRACE_MS = 3_000;
+
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function errorCode(err: unknown): string | undefined {
+	if (typeof err !== "object" || err === null || !("code" in err)) return undefined;
+	return typeof err.code === "string" ? err.code : undefined;
+}
+
+/** Signal the child's process group, then the pid if it is not a leader. */
+function signalGroup(pid: number, signal: NodeJS.Signals | 0): void {
+	if (pid <= 0) return;
 	try {
-		child.proc.kill("SIGTERM");
+		process.kill(-pid, signal);
 	} catch {
-		// Already dead.
-	}
-	const result = await Promise.race([
-		child.exited,
-		new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 3_000)),
-	]);
-	if (result === "timeout") {
 		try {
-			child.proc.kill("SIGKILL");
+			process.kill(pid, signal);
 		} catch {
-			// Already dead.
+			// Already gone.
 		}
-		await child.exited.catch(() => 0);
 	}
+}
+
+function groupAlive(pid: number): boolean {
+	if (pid <= 0) return false;
+	try {
+		process.kill(-pid, 0);
+		return true;
+	} catch (err) {
+		if (errorCode(err) === "EPERM") return true;
+	}
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (err) {
+		return errorCode(err) === "EPERM";
+	}
+}
+
+async function waitUntilGroupGone(pid: number): Promise<void> {
+	const deadline = Date.now() + STOP_GRACE_MS;
+	while (groupAlive(pid)) {
+		if (Date.now() >= deadline) {
+			throw new Error(`process group ${pid} still alive after SIGKILL`);
+		}
+		await delay(20);
+	}
+}
+
+/**
+ * SIGTERM the process group, SIGKILL it after the grace period, and
+ * return only once the group is gone. `stop()`, `killWarren()`, and the
+ * harness tests all come through here.
+ */
+export async function stopSpawned(child: SpawnedProc | undefined): Promise<void> {
+	if (child === undefined) return;
+	const pid = child.proc.pid;
+	signalGroup(pid, "SIGTERM");
+	const exitedInGrace = await Promise.race([
+		child.exited.then(() => true),
+		delay(STOP_GRACE_MS).then(() => false),
+	]);
+	// The direct pid can exit while a grandchild still holds the port.
+	if (!exitedInGrace || groupAlive(pid)) signalGroup(pid, "SIGKILL");
+	await child.exited.catch(() => 0);
+	await waitUntilGroupGone(pid);
 }
 
 function pickPort(): number {
