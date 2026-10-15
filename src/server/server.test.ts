@@ -12,6 +12,7 @@ import { FakeProvider } from "../runtime/fake/fake-provider.ts";
 import { bearerAuth, NO_AUTH } from "./auth.ts";
 import { createBridgeRegistry } from "./bridges.ts";
 import { DEFAULT_IDLE_TIMEOUT_SECONDS, startServer } from "./server.ts";
+import { tcpPortAccepts } from "./tcp-port.ts";
 import type { BridgeRegistry, Route, ServeHandle, ServeOptions, ServerDeps } from "./types.ts";
 
 const silentLogger = {
@@ -140,6 +141,23 @@ describe("startServer — lifecycle", () => {
 		const res = await fetch(`${tcpUrl(handle)}/healthz`);
 		expect(res.status).toBe(200);
 		expect(((await res.json()) as { ok: boolean }).ok).toBe(true);
+	});
+
+	test("stop() returns only after a fresh connection is refused", async () => {
+		handle = startServer(await depsFor(repos), tcpOpts());
+		const url = tcpUrl(handle);
+		const warm = await fetch(`${url}/healthz`);
+		expect(warm.status).toBe(200);
+		await warm.arrayBuffer();
+		if (handle.transport.kind !== "tcp") throw new Error("expected tcp transport");
+		const { hostname, port } = handle.transport;
+		await handle.stop();
+		handle = null;
+		expect(await tcpPortAccepts(hostname, port)).toBe(false);
+		// Plain fetch first: Bun reuses the warm keep-alive socket, which
+		// still returns 200 after stop(false). stop(true) must reset it.
+		await expect(fetch(`${url}/healthz`)).rejects.toThrow();
+		await expect(fetch(`${url}/healthz`, { headers: { connection: "close" } })).rejects.toThrow();
 	});
 
 	test("auth required for non-healthz routes", async () => {

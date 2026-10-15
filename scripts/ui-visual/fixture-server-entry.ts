@@ -20,6 +20,8 @@ if (raw === "" || !Number.isFinite(nowMs)) {
 
 try {
 	const handle = await bootServer({ now: () => new Date(nowMs) });
+	// Port 0 is assigned by the OS. The parent reads this line to learn the URL.
+	console.log(`warren-listening ${handle.url}`);
 	let stopping = false;
 	const shutdown = (): void => {
 		if (stopping) return;

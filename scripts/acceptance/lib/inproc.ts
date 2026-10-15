@@ -29,6 +29,7 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { tcpPortAccepts, waitUntilPortRefused } from "../../../src/server/tcp-port.ts";
 import { AcceptanceError } from "./assert.ts";
 import { waitForHealthz } from "./poll.ts";
 
@@ -85,7 +86,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 	}
 
 	const bind = opts.bind ?? { host: "127.0.0.1", port: pickPort() };
-	const warrenUrl = `http://${bind.host}:${bind.port}`;
+	const initialUrl = bind.port === 0 ? "" : `http://${bind.host}:${bind.port}`;
 
 	const useExplicitDbUrl = opts.dbUrl !== undefined && opts.dbUrl !== "";
 	const env: Record<string, string> = {
@@ -123,20 +124,26 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 
 	const state: ProcState = {
 		warren: undefined,
+		warrenUrl: initialUrl,
 		warrenStartCmd: () => spawnWarren(opts.serverEntry ?? "src/server/main/index.ts", env),
 	};
 
 	state.warren = state.warrenStartCmd();
-	await waitForHealthzWithDiagnostics(warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
+	if (bind.port === 0) {
+		state.warrenUrl = await waitForListeningUrl(state.warren, HEALTHZ_WAIT_TIMEOUT_MS);
+	}
+	await waitForHealthzWithDiagnostics(state.warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
 
 	return {
-		warrenUrl,
+		get warrenUrl() {
+			return state.warrenUrl;
+		},
 		token: opts.token,
 		tmpRoot,
 		dataDir,
 		env,
 		stop: async () => {
-			await stopChild(state.warren);
+			await stopChildAndReleasePort(state.warren, state.warrenUrl);
 			state.warren = undefined;
 			try {
 				await rm(tmpRoot, { recursive: true, force: true });
@@ -145,13 +152,16 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 			}
 		},
 		killWarren: async () => {
-			await stopChild(state.warren);
+			await stopChildAndReleasePort(state.warren, state.warrenUrl);
 			state.warren = undefined;
 		},
 		restartWarren: async () => {
 			if (state.warren !== undefined) return;
 			state.warren = state.warrenStartCmd();
-			await waitForHealthzWithDiagnostics(warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
+			if (bind.port === 0) {
+				state.warrenUrl = await waitForListeningUrl(state.warren, HEALTHZ_WAIT_TIMEOUT_MS);
+			}
+			await waitForHealthzWithDiagnostics(state.warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
 		},
 	};
 }
@@ -169,7 +179,22 @@ interface SpawnedProc {
 
 interface ProcState {
 	warren: SpawnedProc | undefined;
+	warrenUrl: string;
 	warrenStartCmd: () => SpawnedProc;
+}
+
+/** Line the fixture entry prints so a port-0 bind can report the real URL. */
+export const LISTENING_LINE_PREFIX = "warren-listening ";
+
+/** Pull `warren-listening <url>` out of a child's captured stdout. */
+export function parseListeningUrl(text: string): string | undefined {
+	for (const line of text.split("\n")) {
+		const trimmed = line.trim();
+		if (!trimmed.startsWith(LISTENING_LINE_PREFIX)) continue;
+		const url = trimmed.slice(LISTENING_LINE_PREFIX.length).trim();
+		if (url.startsWith("http://") || url.startsWith("https://")) return url;
+	}
+	return undefined;
 }
 
 function spawnWarren(serverEntry: string, env: Record<string, string>): SpawnedProc {
@@ -287,6 +312,52 @@ function renderTails(child: SpawnedProc): string {
 		return "\nchild produced no captured output (empty streams, or live-streamed via WARREN_ACCEPTANCE_WARREN_STDOUT/_STDERR).";
 	}
 	return `\n${parts.join("\n\n")}`;
+}
+
+async function waitForListeningUrl(child: SpawnedProc, timeoutMs: number): Promise<string> {
+	const deadline = Date.now() + timeoutMs;
+	for (;;) {
+		const url = parseListeningUrl(child.stdoutTail.text());
+		if (url !== undefined) return url;
+		if (child.proc.exitCode !== null || child.proc.signalCode !== null) {
+			throw new AcceptanceError(
+				`warren exited before printing its listen url${describeExit(child.proc)}${renderTails(child)}`,
+			);
+		}
+		if (Date.now() >= deadline) {
+			const prefix = LISTENING_LINE_PREFIX.trim();
+			throw new AcceptanceError(
+				`warren did not print ${prefix} <url> within ${timeoutMs}ms${describeExit(child.proc)}${renderTails(child)}`,
+			);
+		}
+		await new Promise((resolve) => setTimeout(resolve, 20));
+	}
+}
+
+async function stopChildAndReleasePort(child: SpawnedProc | undefined, url: string): Promise<void> {
+	await stopChild(child);
+	const target = hostPortFromUrl(url);
+	if (target === undefined) return;
+	if (!(await tcpPortAccepts(target.host, target.port))) return;
+	try {
+		child?.proc.kill("SIGKILL");
+	} catch {
+		// Already dead.
+	}
+	if (child !== undefined) await child.exited.catch(() => 0);
+	await waitUntilPortRefused(target.host, target.port);
+}
+
+function hostPortFromUrl(url: string): { host: string; port: number } | undefined {
+	if (url === "") return undefined;
+	try {
+		const parsed = new URL(url);
+		const port = Number(parsed.port);
+		if (!Number.isInteger(port) || port <= 0) return undefined;
+		return { host: parsed.hostname, port };
+	} catch {
+		return undefined;
+	}
 }
 
 async function stopChild(child: SpawnedProc | undefined): Promise<void> {

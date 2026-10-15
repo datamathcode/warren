@@ -33,6 +33,7 @@ import { buildApiRoutes, isApiPath, isAuthExempt } from "./handlers/index.ts";
 import { bindRequestIdLogger, extractOrGenerateRequestId, stampRequestId } from "./request-id.ts";
 import { jsonResponse, withSecurityHeaders } from "./response.ts";
 import { matchRoute, pathExists } from "./router.ts";
+import { waitUntilPortRefused } from "./tcp-port.ts";
 import type {
 	Actor,
 	AuthDenied,
@@ -143,14 +144,17 @@ export function startServer(deps: ServerDeps, opts: ServeOptions = {}): ServeHan
 		transport: resolvedTransport,
 		url: formatUrl(resolvedTransport),
 		stop: async () => {
-			server.stop(true);
+			// Await stop(true) so keep-alive sockets close with the listen socket.
+			await server.stop(true);
 			if (resolvedTransport.kind === "unix") {
 				try {
 					if (existsSync(resolvedTransport.path)) unlinkSync(resolvedTransport.path);
 				} catch {
 					// Bun normally cleans up the socket inode itself; tolerate races.
 				}
+				return;
 			}
+			await waitUntilPortRefused(resolvedTransport.hostname, resolvedTransport.port);
 		},
 	};
 }

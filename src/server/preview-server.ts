@@ -22,6 +22,7 @@ import { errorLogFields, renderError } from "./errors.ts";
 import { bindRequestIdLogger, extractOrGenerateRequestId, stampRequestId } from "./request-id.ts";
 import { jsonResponse, withSecurityHeaders } from "./response.ts";
 import { DEFAULT_IDLE_TIMEOUT_SECONDS } from "./server.ts";
+import { waitUntilPortRefused } from "./tcp-port.ts";
 import type { Logger, PreviewProxyHandler, ServeHandle, Transport } from "./types.ts";
 
 export interface PreviewServerOptions {
@@ -107,7 +108,8 @@ export function startPreviewServer(opts: PreviewServerOptions): ServeHandle {
 		transport,
 		url: `http://${transport.hostname}:${transport.port}`,
 		stop: async () => {
-			server.stop(true);
+			await server.stop(true);
+			await waitUntilPortRefused(transport.hostname, transport.port);
 		},
 	};
 }

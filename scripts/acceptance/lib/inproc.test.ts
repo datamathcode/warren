@@ -6,7 +6,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { AcceptanceError } from "./assert.ts";
-import { spawnCaptured, waitForHealthzWithDiagnostics } from "./inproc.ts";
+import { parseListeningUrl, spawnCaptured, waitForHealthzWithDiagnostics } from "./inproc.ts";
 
 // Port 1 on loopback refuses connections instantly, so the healthz loop
 // runs its full backoff against a guaranteed-unreachable URL.
@@ -25,6 +25,18 @@ async function expectTimeout(
 	expect(err).toBeInstanceOf(AcceptanceError);
 	return err as AcceptanceError;
 }
+
+describe("parseListeningUrl", () => {
+	test("reads the fixture listen line and ignores other output", () => {
+		const text = [
+			'{"msg":"warren server listening"}',
+			"warren-listening http://127.0.0.1:43123",
+			"noise",
+		].join("\n");
+		expect(parseListeningUrl(text)).toBe("http://127.0.0.1:43123");
+		expect(parseListeningUrl("not a listen line")).toBeUndefined();
+	});
+});
 
 describe("waitForHealthzWithDiagnostics", () => {
 	test("attaches buffered stderr and the exit code when healthz times out", async () => {
