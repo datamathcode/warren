@@ -23,7 +23,7 @@ const runEvent = z.strictObject({
 	kind: z.string(),
 	stream: eventStreamSchema.nullable(),
 	origin: z.string().nullable(),
-	payload: z.unknown(),
+	payload: z.unknown().describe("The shape depends on `kind`."),
 });
 
 const runEvents = defineRoute("GET", "/runs/:id/events", {

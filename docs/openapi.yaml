@@ -5881,7 +5881,8 @@ components:
           anyOf:
             - type: string
             - type: 'null'
-        payload: {}
+        payload:
+          description: The shape depends on `kind`.
       required:
         - id
         - runId
