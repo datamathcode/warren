@@ -5,12 +5,10 @@ info:
   title: warren HTTP API
   version: 0.19.3
   description: >-
-    Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE`. Run `bun run
-    gen:openapi` to refresh; CI fails if this schema drifts from the handler module. Response
-    schemas for the core documents live under `components.schemas`, with enum vocabulary derived
-    from `src/core/wire.ts`; request bodies and routes without a known envelope stay permissive —
-    see docs/http-api.md for the canonical handler contracts. Operations require bearerAuth unless
-    the route policy is anonymous.
+    Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE` and the Zod schemas in
+    `src/server/schemas/`. Run `bun run gen:openapi` to refresh; CI fails if this schema drifts.
+    Enum vocabulary comes from `src/core/wire.ts`. A route with no published schema keeps a
+    permissive success response. Operations require bearerAuth unless the route policy is anonymous.
   license:
     name: MIT
     identifier: MIT
@@ -67,14 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  agents:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Agent'
-                required:
-                  - agents
+                $ref: '#/components/schemas/ListAgentsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -96,6 +87,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -123,6 +118,16 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealAlertResponse'
+        '202':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealAlertResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -138,6 +143,12 @@ paths:
       description: >-
         warren-3db0: closed-loop alert intake. Token-gated via the standard bearer gate (not
         auth-exempt); webhook senders carry the bearer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealAlertRequest'
   /analytics/behavior:
     get:
       operationId: listBehaviorAnalyticsHandler
@@ -147,6 +158,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BehaviorAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -168,6 +183,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -189,6 +208,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -210,6 +233,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -235,6 +262,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -259,6 +290,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/LifecycleNotification'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -287,6 +322,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/NdjsonDocument'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -311,6 +350,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgeRepos'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -335,6 +378,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -357,6 +404,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -380,6 +431,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -403,6 +458,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Healthz'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -425,6 +484,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstanceFacts'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -449,6 +512,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PrometheusText'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -470,6 +537,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpsOverview'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -497,14 +568,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRuns:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRun'
-                required:
-                  - planRuns
+                $ref: '#/components/schemas/ListPlanRunsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -523,22 +587,12 @@ paths:
         - plan-runs
       summary: POST /plan-runs
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  children:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRunChild'
-                required:
-                  - planRun
-                  - children
+                $ref: '#/components/schemas/CreatePlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -551,6 +605,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRunRequest'
   /plan-runs/{id}:
     get:
       operationId: getPlanRunHandler
@@ -563,22 +623,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  children:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRunChild'
-                  runs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Run'
-                required:
-                  - planRun
-                  - children
-                  - runs
+                $ref: '#/components/schemas/GetPlanRunDetailResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -609,25 +654,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  cancelledChild:
-                    type:
-                      - object
-                      - 'null'
-                    properties:
-                      childSeq:
-                        type: integer
-                      runId:
-                        type: string
-                  alreadyTerminal:
-                    type: boolean
-                required:
-                  - planRun
-                  - cancelledChild
-                  - alreadyTerminal
+                $ref: '#/components/schemas/CancelPlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -640,6 +667,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -655,6 +690,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/RunEvent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -682,6 +721,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumePlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -694,6 +737,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -709,6 +760,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewConfig'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -733,14 +788,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  projects:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Project'
-                required:
-                  - projects
+                $ref: '#/components/schemas/ListProjectsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -759,17 +807,12 @@ paths:
         - projects
       summary: POST /projects
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  project:
-                    $ref: '#/components/schemas/Project'
-                required:
-                  - project
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -782,6 +825,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
   /projects/{id}:
     get:
       operationId: getProjectHandler
@@ -794,12 +843,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  project:
-                    $ref: '#/components/schemas/Project'
-                required:
-                  - project
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -826,6 +870,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -838,6 +886,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -853,6 +909,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigMigrateResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -865,6 +925,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -878,8 +946,12 @@ paths:
         - projects
       summary: POST /projects/:id/init
       responses:
-        '200':
+        '201':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitProjectResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -902,6 +974,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitProjectRequest'
   /projects/{id}/ready-plans:
     get:
       operationId: listReadyPlansHandler
@@ -911,6 +990,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyPlans'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -938,6 +1021,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshProjectResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -956,6 +1043,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshProjectRequest'
   /projects/{id}/seeds/plans:
     get:
       operationId: listProjectSeedPlansHandler
@@ -965,6 +1059,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSeedPlans'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -993,6 +1091,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSeed'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1025,6 +1127,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTriggers'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1050,8 +1156,12 @@ paths:
         - projects
       summary: POST /projects/:id/triggers/:triggerId/run
       responses:
-        '200':
+        '201':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1064,6 +1174,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -1084,6 +1202,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectWarrenConfig'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1111,6 +1233,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readyz'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1135,31 +1261,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  runs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Run'
-                  total:
-                    type: integer
-                  limit:
-                    type: integer
-                  offset:
-                    type: integer
-                  costTotalUsd:
-                    type:
-                      - number
-                      - 'null'
-                  costPricedCount:
-                    type: integer
-                required:
-                  - runs
-                  - total
-                  - limit
-                  - offset
-                  - costTotalUsd
-                  - costPricedCount
+                $ref: '#/components/schemas/ListRunsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1178,28 +1280,12 @@ paths:
         - runs
       summary: POST /runs
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run:
-                    $ref: '#/components/schemas/Run'
-                  sandbox:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      workspacePath:
-                        type: string
-                    required:
-                      - id
-                      - workspacePath
-                required:
-                  - run
-                  - sandbox
+                $ref: '#/components/schemas/CreateRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1212,6 +1298,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunRequest'
   /runs/{id}:
     get:
       operationId: getRunHandler
@@ -1224,12 +1316,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run:
-                    $ref: '#/components/schemas/Run'
-                required:
-                  - run
+                $ref: '#/components/schemas/GetRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1257,6 +1344,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1275,6 +1366,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRunRequest'
   /runs/{id}/events:
     get:
       operationId: streamRunEventsHandler
@@ -1284,6 +1382,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/RunEvent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1316,6 +1418,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeIntentPoll'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1347,6 +1453,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeResultResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1365,6 +1475,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeResultRequest'
   /runs/{id}/git-credential:
     post:
       operationId: postRunGitCredentialHandler
@@ -1374,6 +1490,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitCredentialResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1389,7 +1509,14 @@ paths:
       description: >-
         warren-c9ac: the in-pod credential re-mint (forge-contract.md §4.1 window 3) — the pod
         requests a freshly-minted push credential over the same authenticated callback channel
-        instead of trusting the mounted Secret.
+        instead of trusting the mounted Secret. This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -1405,6 +1532,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunInbox'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1439,6 +1570,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewLoginResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1461,6 +1596,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewLoginRequest'
   /runs/{id}/preview/teardown:
     post:
       operationId: previewTeardownHandler
@@ -1470,6 +1612,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewTeardownResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1488,6 +1634,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        description: The JSON body is optional. An empty body is valid.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewTeardownRequest'
   /runs/{id}/salvage:
     post:
       operationId: postRunSalvageHandler
@@ -1497,6 +1650,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalvageResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1519,6 +1676,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalvageRequest'
   /runs/{id}/steer:
     post:
       operationId: steerRunHandler
@@ -1528,6 +1691,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SteerRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1546,6 +1713,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SteerRunRequest'
   /setup:
     get:
       operationId: setupHandoffHandler
@@ -1555,6 +1728,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1580,6 +1757,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1602,6 +1783,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Whoami'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1622,7 +1807,2233 @@ components:
       scheme: bearer
       description: Operator bearer token (WARREN_API_TOKEN). Anonymous routes set security to an empty array.
   schemas:
-    RunState:
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        renderedJson: {}
+        registeredAt:
+          type: string
+        lastRefreshed:
+          type: string
+        description:
+          anyOf:
+            - type: string
+            - type: 'null'
+        provider:
+          anyOf:
+            - type: string
+            - type: 'null'
+        model:
+          anyOf:
+            - type: string
+            - type: 'null'
+        source:
+          $ref: '#/components/schemas/AgentSource'
+      required:
+        - id
+        - name
+        - registeredAt
+        - lastRefreshed
+        - description
+        - provider
+        - model
+        - source
+      additionalProperties: false
+      description: An agent row. `renderedJson` is omitted for a public spectator.
+    AgentSource:
+      type: string
+      enum:
+        - builtin
+        - library
+    BehaviorAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        mining:
+          type: object
+          properties:
+            totals:
+              type: object
+              properties:
+                toolUses:
+                  type: number
+                commands:
+                  type: number
+                distinctCommands:
+                  type: number
+                failures:
+                  type: number
+                retries:
+                  type: number
+                byRuntime:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      runtime:
+                        type: string
+                      shaped:
+                        type: boolean
+                      toolUses:
+                        type: number
+                      commands:
+                        type: number
+                      unparsed:
+                        type: number
+                    required:
+                      - runtime
+                      - shaped
+                      - toolUses
+                      - commands
+                      - unparsed
+                    additionalProperties: false
+              required:
+                - toolUses
+                - commands
+                - distinctCommands
+                - failures
+                - retries
+                - byRuntime
+              additionalProperties: false
+            byFrequency:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byFailures:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byStuckScore:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            osEcoCommands:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byCategory:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  commands:
+                    type: number
+                required:
+                  - category
+                  - invocations
+                  - failures
+                  - commands
+                additionalProperties: false
+          required:
+            - totals
+            - byFrequency
+            - byFailures
+            - byStuckScore
+            - osEcoCommands
+            - byCategory
+          additionalProperties: false
+        directories:
+          type: object
+          properties:
+            directories:
+              type: array
+              items:
+                type: object
+                properties:
+                  directory:
+                    type: string
+                  runsTouching:
+                    type: number
+                  runsFailed:
+                    type: number
+                  failureShare:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  fileTouches:
+                    type: number
+                  errorTouches:
+                    type: number
+                  retries:
+                    type: number
+                  steeringMessages:
+                    type: number
+                  difficultyScore:
+                    type: number
+                  confidence:
+                    type: string
+                    enum:
+                      - low
+                      - medium
+                      - high
+                required:
+                  - directory
+                  - runsTouching
+                  - runsFailed
+                  - failureShare
+                  - fileTouches
+                  - errorTouches
+                  - retries
+                  - steeringMessages
+                  - difficultyScore
+                  - confidence
+                additionalProperties: false
+            totals:
+              type: object
+              properties:
+                runsInWindow:
+                  type: number
+                runsWithFilePaths:
+                  type: number
+                fileTouches:
+                  type: number
+                directoriesRanked:
+                  type: number
+                directoriesBelowMinN:
+                  type: number
+              required:
+                - runsInWindow
+                - runsWithFilePaths
+                - fileTouches
+                - directoriesRanked
+                - directoriesBelowMinN
+              additionalProperties: false
+          required:
+            - directories
+            - totals
+          additionalProperties: false
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                  - highest-context-seed
+                  - worst-success-agent
+                  - most-failed-command
+                  - most-retried-command
+                  - model-cost-outlier
+                  - steering-anomaly
+                  - steering-outcome-delta
+                  - cost-per-merged-pr
+                  - context-waste-proxy
+                  - hardest-directory
+              severity:
+                type: string
+                enum:
+                  - info
+                  - warning
+                  - critical
+              title:
+                type: string
+              detail:
+                type: string
+              value:
+                type: number
+              subject:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              denominator:
+                type: number
+              confidence:
+                type: string
+                enum:
+                  - low
+                  - medium
+                  - high
+            required:
+              - kind
+              - severity
+              - title
+              - detail
+              - value
+              - subject
+            additionalProperties: false
+        outcomes:
+          type: object
+          properties:
+            steering:
+              type: object
+              properties:
+                steered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                unsteered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                mergedPrRateDelta:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - steered
+                - unsteered
+                - mergedPrRateDelta
+                - confidence
+              additionalProperties: false
+            costPerMergedPr:
+              type: object
+              properties:
+                overall:
+                  type: object
+                  properties:
+                    costUsd:
+                      type: number
+                    priced:
+                      type: number
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    costPerMergedPrUsd:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - costUsd
+                    - priced
+                    - prStateKnown
+                    - prsMerged
+                    - costPerMergedPrUsd
+                  additionalProperties: false
+                byAgent:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byModel:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byProvider:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - overall
+                - byAgent
+                - byModel
+                - byProvider
+                - confidence
+              additionalProperties: false
+            autonomy:
+              type: object
+              properties:
+                merged:
+                  type: number
+                autonomous:
+                  type: number
+                rate:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - merged
+                - autonomous
+                - rate
+              additionalProperties: false
+          required:
+            - steering
+            - costPerMergedPr
+            - autonomy
+          additionalProperties: false
+        contextWaste:
+          type: object
+          properties:
+            runsInWindow:
+              type: number
+            runsWithRollup:
+              type: number
+            runsMeasured:
+              type: number
+            contextTokensTotal:
+              type: number
+            resultBytesTotal:
+              type: number
+            share:
+              anyOf:
+                - type: number
+                - type: 'null'
+            byTool:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  invocations:
+                    type: number
+                  resultBytesKnown:
+                    type: number
+                  resultBytesTotal:
+                    type: number
+                  runs:
+                    type: number
+                  runsMeasured:
+                    type: number
+                  contextTokensTotal:
+                    type: number
+                  share:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                required:
+                  - key
+                  - invocations
+                  - resultBytesKnown
+                  - resultBytesTotal
+                  - runs
+                  - runsMeasured
+                  - contextTokensTotal
+                  - share
+                additionalProperties: false
+            byCommand:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  invocations:
+                    type: number
+                  resultBytesKnown:
+                    type: number
+                  resultBytesTotal:
+                    type: number
+                  runs:
+                    type: number
+                  runsMeasured:
+                    type: number
+                  contextTokensTotal:
+                    type: number
+                  share:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                required:
+                  - key
+                  - invocations
+                  - resultBytesKnown
+                  - resultBytesTotal
+                  - runs
+                  - runsMeasured
+                  - contextTokensTotal
+                  - share
+                additionalProperties: false
+            confidence:
+              type: string
+              enum:
+                - low
+                - medium
+                - high
+          required:
+            - runsInWindow
+            - runsWithRollup
+            - runsMeasured
+            - contextTokensTotal
+            - resultBytesTotal
+            - share
+            - byTool
+            - byCommand
+            - confidence
+          additionalProperties: false
+        truncated:
+          type: boolean
+      required:
+        - filter
+        - mining
+        - directories
+        - insights
+        - outcomes
+        - contextWaste
+        - truncated
+      additionalProperties: false
+    CancelPlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        cancelledChild:
+          anyOf:
+            - type: object
+              properties:
+                childSeq:
+                  type: integer
+                runId:
+                  type: string
+              required:
+                - childSeq
+                - runId
+              additionalProperties: false
+            - type: 'null'
+        alreadyTerminal:
+          type: boolean
+      required:
+        - planRun
+        - cancelledChild
+        - alreadyTerminal
+      additionalProperties: false
+    CancelRunRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+      additionalProperties: false
+    CancelRunResponse:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/RunState'
+        alreadyTerminal:
+          type: boolean
+        sandboxRun:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                state:
+                  $ref: '#/components/schemas/RunState'
+              required:
+                - id
+                - state
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - state
+        - alreadyTerminal
+        - sandboxRun
+      additionalProperties: false
+    CloneKind:
+      type: string
+      enum:
+        - replicate
+        - continue
+        - rescue
+    ConfigMigrateResponse:
+      type: object
+      properties:
+        projectId:
+          type: string
+        migrated:
+          type: object
+          properties:
+            written:
+              type: array
+              items:
+                type: string
+            previewHoisted:
+              type: boolean
+          required:
+            - written
+            - previewHoisted
+          additionalProperties: false
+      required:
+        - projectId
+        - migrated
+      additionalProperties: false
+    CostAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            runs:
+              type: number
+            priced:
+              type: number
+            costUsd:
+              type: number
+          required:
+            - runs
+            - priced
+            - costUsd
+          additionalProperties: false
+        breakdowns:
+          type: object
+          properties:
+            date:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            project:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            plan:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            run:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            agent:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            model:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            provider:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+          required:
+            - date
+            - project
+            - plan
+            - run
+            - agent
+            - model
+            - provider
+          additionalProperties: false
+        byCostBasis:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                enum:
+                  - api
+                  - subscription_estimate
+                  - unpriced
+              runs:
+                type: number
+              costUsd:
+                type: number
+            required:
+              - key
+              - runs
+              - costUsd
+            additionalProperties: false
+      required:
+        - filter
+        - totals
+        - breakdowns
+        - byCostBasis
+      additionalProperties: false
+    CreatePlanRunRequest:
+      type: object
+      properties:
+        project:
+          type: string
+          minLength: 1
+        agent:
+          type: string
+          minLength: 1
+        planId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        issues:
+          anyOf:
+            - type: array
+              items:
+                type: string
+            - type: 'null'
+        promptTemplate:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - project
+        - agent
+      additionalProperties: false
+      description: Exactly one of `planId` or `issues` is required.
+    CreatePlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRunChild'
+      required:
+        - planRun
+        - children
+      additionalProperties: false
+    CreateProjectRequest:
+      type: object
+      properties:
+        gitUrl:
+          type: string
+          minLength: 1
+        defaultBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - gitUrl
+      additionalProperties: false
+    CreateRunRequest:
+      type: object
+      properties:
+        agent:
+          anyOf:
+            - type: string
+            - type: 'null'
+        project:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prompt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseCommit:
+          anyOf:
+            - type: string
+            - type: 'null'
+        targetBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        existingBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        trigger:
+          anyOf:
+            - type: string
+            - type: 'null'
+        seedId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+        continueFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        cloneFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        rescueFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: 'null'
+        mulch:
+          anyOf:
+            - type: string
+              enum:
+                - 'on'
+                - 'off'
+            - type: 'null'
+        metadata:
+          anyOf:
+            - type: object
+              properties: {}
+              additionalProperties: {}
+            - type: 'null'
+      additionalProperties: false
+      description: >-
+        Dispatch a run. `agent`, `project`, and `prompt` are required unless `cloneFromRunId` or
+        `rescueFromRunId` is set.
+    CreateRunResponse:
+      type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/Run'
+        sandbox:
+          type: object
+          properties:
+            id:
+              type: string
+            workspacePath:
+              type: string
+          required:
+            - id
+            - workspacePath
+          additionalProperties: false
+      required:
+        - run
+        - sandbox
+      additionalProperties: false
+    DispatchAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            dispatches:
+              type: number
+          required:
+            - dispatches
+          additionalProperties: false
+        byDispatchOrigin:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byRetryKind:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byProviderModel:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byQueueDepth:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              runId:
+                type: string
+              createdAt:
+                type: string
+              agentName:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              provider:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              model:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              dispatchOrigin:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              retryKind:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              queueQueuedRuns:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              queueRunningRuns:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              queueProjectNonTerminal:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              projectId:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              state:
+                $ref: '#/components/schemas/RunState'
+              failureReason:
+                anyOf:
+                  - $ref: '#/components/schemas/RunFailureReason'
+                  - type: 'null'
+              costUsd:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prState:
+                anyOf:
+                  - $ref: '#/components/schemas/PullRequestLifecycle'
+                  - type: 'null'
+            required:
+              - runId
+              - createdAt
+              - agentName
+              - provider
+              - model
+              - dispatchOrigin
+              - retryKind
+              - queueQueuedRuns
+              - queueRunningRuns
+              - queueProjectNonTerminal
+              - projectId
+              - state
+              - failureReason
+              - costUsd
+              - prState
+            additionalProperties: false
+      required:
+        - filter
+        - totals
+        - byDispatchOrigin
+        - byRetryKind
+        - byProviderModel
+        - byQueueDepth
+        - rows
+      additionalProperties: false
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            hint:
+              type: string
+          required:
+            - code
+            - message
+          additionalProperties: false
+      required:
+        - error
+      additionalProperties: false
+      description: Error body for every non-success response.
+    EventList:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunEvent'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - events
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+      description: A page of events. The public projection omits internal rows.
+    EventStream:
+      type: string
+      enum:
+        - stdout
+        - stderr
+        - system
+    FinalizeIntentPoll:
+      type: object
+      properties:
+        intent:
+          anyOf:
+            - type: object
+              properties:
+                branch:
+                  type: string
+                push:
+                  type: boolean
+                artifacts:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - branch
+                - push
+                - artifacts
+              additionalProperties: {}
+            - type: 'null'
+      required:
+        - intent
+      additionalProperties: false
+      description: The parked finalize intent, or null until reap parks one. Extra intent fields are allowed.
+    FinalizeResultRequest:
+      type: object
+      properties:
+        version:
+          type: number
+          const: 1
+        attemptId:
+          type: string
+          minLength: 1
+        result:
+          type: object
+          properties:
+            pushed:
+              type: boolean
+            commitsAhead:
+              anyOf:
+                - type: number
+                - type: 'null'
+            commitsAheadBase:
+              anyOf:
+                - type: string
+                - type: 'null'
+            emptyPush:
+              type: boolean
+            dirty:
+              type: boolean
+            dirtyPaths:
+              type: array
+              items:
+                type: string
+            workspacePlansBody:
+              anyOf:
+                - type: string
+                - type: 'null'
+            events:
+              type: array
+              items:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                    minLength: 1
+                  payload: {}
+                required:
+                  - kind
+                additionalProperties: {}
+            artifacts:
+              type: object
+              propertyNames:
+                type: string
+              additionalProperties:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          minLength: 1
+                        mergedBody:
+                          type: string
+                      required:
+                        - path
+                        - mergedBody
+                      additionalProperties: {}
+                  counts:
+                    type: object
+                    propertyNames:
+                      type: string
+                    additionalProperties:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                required:
+                  - files
+                additionalProperties: {}
+            prBranch:
+              anyOf:
+                - type: string
+                - type: 'null'
+            stages:
+              type: array
+              items:
+                type: object
+                properties:
+                  stage:
+                    type: string
+                    minLength: 1
+                  status:
+                    type: string
+                    enum:
+                      - ok
+                      - skipped
+                      - failed
+                  error:
+                    type: string
+                required:
+                  - stage
+                  - status
+                additionalProperties: {}
+          required:
+            - pushed
+            - commitsAhead
+            - emptyPush
+            - dirty
+            - events
+            - stages
+          additionalProperties: {}
+      required:
+        - version
+        - attemptId
+        - result
+      additionalProperties: {}
+      description: In-pod finalize envelope. Unknown keys are ignored. Version is 1.
+    FinalizeResultResponse:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+            - accepted
+            - duplicate
+            - stale
+            - unknown
+      required:
+        - outcome
+      additionalProperties: false
+    ForgeRepos:
+      type: object
+      properties:
+        supported:
+          type: boolean
+        repos:
+          type: array
+          items:
+            type: object
+            properties:
+              owner:
+                type: string
+              name:
+                type: string
+              cloneUrl:
+                type: string
+              defaultBranch:
+                type: string
+              private:
+                type: boolean
+            required:
+              - owner
+              - name
+              - cloneUrl
+              - defaultBranch
+              - private
+            additionalProperties: false
+        error:
+          type: string
+      required:
+        - supported
+        - repos
+      additionalProperties: false
+    GetPlanRunDetailResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRunChild'
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Run'
+      required:
+        - planRun
+        - children
+        - runs
+      additionalProperties: false
+    GetRunResponse:
+      type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/Run'
+      required:
+        - run
+      additionalProperties: false
+    GitCredentialResponse:
+      type: object
+      properties:
+        gitToken:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - gitToken
+      additionalProperties: false
+      description: A freshly minted git credential, or null when the forge mints anonymously.
+    HealAlertRequest:
+      type: object
+      properties: {}
+      additionalProperties: {}
+      description: Webhook JSON. The source query parameter selects sentry or grafana.
+    HealAlertResponse:
+      oneOf:
+        - type: object
+          properties:
+            status:
+              type: string
+              const: skipped
+            reason:
+              type: string
+            fingerprint:
+              type: string
+            source:
+              type: string
+              enum:
+                - sentry
+                - grafana
+          required:
+            - status
+            - reason
+            - fingerprint
+            - source
+          additionalProperties: false
+        - type: object
+          properties:
+            status:
+              type: string
+              const: dispatched
+            runId:
+              type: string
+            fingerprint:
+              type: string
+            projectId:
+              type: string
+            source:
+              type: string
+              enum:
+                - sentry
+                - grafana
+          required:
+            - status
+            - runId
+            - fingerprint
+            - projectId
+            - source
+          additionalProperties: false
+      description: 200 when the alert is skipped. 202 when a healer run is dispatched. Both use this body.
+    Healthz:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          const: true
+      required:
+        - ok
+      additionalProperties: false
+    HtmlPage:
+      type: string
+      description: An HTML page. The success body is not JSON.
+    InboxMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        runId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        body:
+          type: string
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+        fromActor:
+          type: string
+        state:
+          type: string
+          enum:
+            - unread
+            - delivered
+            - failed
+        createdAt:
+          type: string
+        deliveredAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - runId
+        - body
+        - priority
+        - fromActor
+        - state
+        - createdAt
+        - deliveredAt
+      additionalProperties: false
+      description: A steering message on a run.
+    InitProjectRequest:
+      type: object
+      properties:
+        defaultRole:
+          type: string
+        defaultPrompt:
+          type: string
+        defaultProvider:
+          type: string
+        defaultModel:
+          type: string
+        defaultBranch:
+          type: string
+        runBranchPrefix:
+          type: string
+        overwrite:
+          type: boolean
+      additionalProperties: false
+      description: Optional scaffold defaults. An empty body writes an empty defaults block.
+    InitProjectResponse:
+      type: object
+      properties:
+        projectId:
+          type: string
+        scaffolded:
+          type: object
+          properties:
+            files:
+              type: array
+              items:
+                type: string
+            defaultRole:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - files
+            - defaultRole
+          additionalProperties: false
+      required:
+        - projectId
+        - scaffolded
+      additionalProperties: false
+    InstanceFacts:
+      type: object
+      properties:
+        version:
+          type: string
+        runtime:
+          type: string
+          enum:
+            - local
+            - k8s
+            - docker
+        authMode:
+          type: string
+          enum:
+            - token
+            - public
+        dbBackend:
+          anyOf:
+            - type: string
+              enum:
+                - sqlite
+                - postgres
+            - type: 'null'
+        uptimeSeconds:
+          type: number
+        admission:
+          anyOf:
+            - type: object
+              properties:
+                maxQueueDepth:
+                  type: number
+                maxPendingPods:
+                  type: number
+                maxProjectConcurrency:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - maxQueueDepth
+                - maxPendingPods
+                - maxProjectConcurrency
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - version
+        - runtime
+        - authMode
+      additionalProperties: false
+    LifecycleNotification:
+      type: object
+      properties:
+        runId:
+          type: string
+        hook:
+          type: string
+          enum:
+            - run_dispatched
+            - run_started
+            - event_emitted
+            - pre_reap
+            - post_reap
+            - branch_pushed
+        state:
+          anyOf:
+            - $ref: '#/components/schemas/RunState'
+            - type: 'null'
+        ts:
+          type: string
+      required:
+        - runId
+        - hook
+        - state
+        - ts
+      additionalProperties: false
+      description: One NDJSON line. A closed tail may be empty. A live tail stays open and writes more lines.
+    ListAgentsResponse:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+      required:
+        - agents
+      additionalProperties: false
+    ListPlanRunsResponse:
+      type: object
+      properties:
+        planRuns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRun'
+      required:
+        - planRuns
+      additionalProperties: false
+    ListProjectsResponse:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+      required:
+        - projects
+      additionalProperties: false
+    ListRunsResponse:
+      type: object
+      properties:
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Run'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        costTotalUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        costPricedCount:
+          type: integer
+      required:
+        - runs
+        - total
+        - limit
+        - offset
+        - costPricedCount
+      additionalProperties: false
+    NdjsonDocument:
+      type: string
+      description: The proxied judge export. An unconfigured instance answers 501 JSON instead of this body.
+    NoRequestBody:
+      type: object
+      properties: {}
+      additionalProperties: false
+      description: This operation takes no JSON body. An empty body or an empty object is valid.
+    OpsOverview:
+      type: object
+      properties:
+        runs:
+          type: object
+          properties:
+            byState:
+              type: object
+              properties:
+                queued:
+                  type: number
+                running:
+                  type: number
+                succeeded:
+                  type: number
+                failed:
+                  type: number
+                cancelled:
+                  type: number
+              required:
+                - queued
+                - running
+                - succeeded
+                - failed
+                - cancelled
+              additionalProperties: false
+            nonTerminal:
+              type: number
+            total:
+              type: number
+          required:
+            - byState
+            - nonTerminal
+            - total
+          additionalProperties: false
+        window:
+          type: string
+          enum:
+            - 24h
+            - 7d
+            - 30d
+        spend:
+          type: object
+          properties:
+            totalUsd:
+              type: number
+            windowUsd:
+              type: number
+            windowRuns:
+              type: number
+          required:
+            - windowRuns
+          additionalProperties: false
+        delivery:
+          type: object
+          properties:
+            branchesPushed:
+              type: number
+            prsOpened:
+              type: number
+            prsMerged:
+              type: number
+          required:
+            - branchesPushed
+            - prsOpened
+            - prsMerged
+          additionalProperties: false
+        services:
+          type: object
+          properties:
+            dbReachable:
+              type: boolean
+            runtime:
+              type: string
+              enum:
+                - local
+                - k8s
+                - docker
+            lifecycleStream:
+              type: boolean
+          required:
+            - dbReachable
+            - runtime
+            - lifecycleStream
+          additionalProperties: false
+        generatedAt:
+          type: string
+      required:
+        - runs
+        - window
+        - spend
+        - delivery
+        - services
+        - generatedAt
+      additionalProperties: false
+    PlanRun:
+      type: object
+      properties:
+        id:
+          type: string
+        planId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        source:
+          $ref: '#/components/schemas/PlanRunSource'
+        projectId:
+          type: string
+        agentName:
+          type: string
+        promptTemplate:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+        trigger:
+          type: string
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        state:
+          $ref: '#/components/schemas/PlanRunState'
+        failureReason:
+          anyOf:
+            - type: string
+            - type: 'null'
+        createdAt:
+          type: string
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        resumedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - planId
+        - source
+        - projectId
+        - agentName
+        - ref
+        - trigger
+        - parentRunId
+        - state
+        - createdAt
+        - startedAt
+        - endedAt
+        - resumedAt
+      additionalProperties: false
+      description: >-
+        A plan-run row. Dispatch overrides and the prompt template are omitted for a public
+        spectator.
+    PlanRunChild:
+      type: object
+      properties:
+        planRunId:
+          type: string
+        seq:
+          type: integer
+        seedId:
+          type: string
+        runId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        state:
+          $ref: '#/components/schemas/PlanRunChildState'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prMergedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        failureReason:
+          anyOf:
+            - type: string
+            - type: 'null'
+        retryCount:
+          type: integer
+      required:
+        - planRunId
+        - seq
+        - seedId
+        - runId
+        - state
+        - createdAt
+        - updatedAt
+        - startedAt
+        - endedAt
+        - prMergedAt
+        - retryCount
+      additionalProperties: false
+      description: One child of a plan-run. `failureReason` is omitted for a public spectator.
+    PlanRunChildState:
+      type: string
+      enum:
+        - pending
+        - dispatched
+        - running
+        - pr_open
+        - merged
+        - failed
+        - skipped
+    PlanRunSource:
+      type: string
+      enum:
+        - plan
+        - issues
+    PlanRunState:
       type: string
       enum:
         - queued
@@ -1630,6 +4041,1859 @@ components:
         - succeeded
         - failed
         - cancelled
+    PreviewConfig:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - path
+            - subdomain
+        host:
+          anyOf:
+            - type: string
+            - type: 'null'
+        port:
+          anyOf:
+            - type: integer
+            - type: 'null'
+      required:
+        - mode
+        - host
+        - port
+      additionalProperties: false
+    PreviewLoginRequest:
+      type: object
+      properties:
+        redirect:
+          type: string
+      additionalProperties: false
+    PreviewLoginResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+      additionalProperties: false
+    PreviewState:
+      type: string
+      enum:
+        - starting
+        - live
+        - failed
+        - torn-down
+    PreviewTeardownRequest:
+      type: object
+      properties:
+        actor:
+          type: string
+      additionalProperties: false
+    PreviewTeardownResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - torn-down
+            - already-torn-down
+            - already-failed
+            - never-launched
+        tornDown:
+          type: boolean
+        previousState:
+          anyOf:
+            - $ref: '#/components/schemas/PreviewState'
+            - type: 'null'
+        port:
+          anyOf:
+            - type: integer
+            - type: 'null'
+      required:
+        - status
+        - tornDown
+        - previousState
+        - port
+      additionalProperties: false
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        gitUrl:
+          type: string
+        localPath:
+          anyOf:
+            - type: string
+            - type: 'null'
+        defaultBranch:
+          type: string
+        addedAt:
+          type: string
+        lastFetchedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        lastHeadSha:
+          anyOf:
+            - type: string
+            - type: 'null'
+        hasSeeds:
+          type: boolean
+      required:
+        - id
+        - gitUrl
+        - defaultBranch
+        - addedAt
+        - lastFetchedAt
+        - lastHeadSha
+        - hasSeeds
+      additionalProperties: false
+      description: A registered project. `localPath` is omitted for a public spectator.
+    ProjectSeed:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - other
+        blockedBy:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - status
+        - blockedBy
+      additionalProperties: false
+    ProjectSeedPlans:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+                enum:
+                  - draft
+                  - approved
+                  - active
+                  - done
+              seed:
+                type: string
+              template:
+                type: string
+              revision:
+                type: number
+              name:
+                type: string
+              childCount:
+                type: integer
+              createdAt:
+                type: string
+              updatedAt:
+                type: string
+            required:
+              - id
+              - status
+              - childCount
+            additionalProperties: false
+      required:
+        - plans
+      additionalProperties: false
+    ProjectTriggers:
+      type: object
+      properties:
+        triggers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              kind:
+                type: string
+                const: cron
+              cron:
+                type: string
+              seed:
+                type: string
+              role:
+                type: string
+              timezone:
+                type: string
+              prompt:
+                type: string
+              maxCostUsd:
+                type: number
+              lastFiredAt:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              nextFireAt:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              lastRunId:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              parseError:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+            required:
+              - id
+              - kind
+              - cron
+              - role
+              - lastFiredAt
+              - nextFireAt
+              - lastRunId
+              - parseError
+            additionalProperties: false
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+      required:
+        - triggers
+        - errors
+      additionalProperties: false
+    ProjectWarrenConfig:
+      type: object
+      properties:
+        triggers:
+          anyOf:
+            - type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  kind:
+                    type: string
+                    const: cron
+                  cron:
+                    type: string
+                  seed:
+                    type: string
+                  role:
+                    type: string
+                  timezone:
+                    type: string
+                  prompt:
+                    type: string
+                  maxCostUsd:
+                    type: number
+                    exclusiveMinimum: 0
+                required:
+                  - id
+                  - kind
+                  - cron
+                  - role
+                additionalProperties: false
+            - type: 'null'
+        defaults:
+          anyOf:
+            - type: object
+              properties:
+                defaultRole:
+                  type: string
+                defaultBranch:
+                  type: string
+                defaultProvider:
+                  type: string
+                defaultModel:
+                  type: string
+                runBranchPrefix:
+                  type: string
+              additionalProperties: {}
+            - type: 'null'
+        sourceFile:
+          anyOf:
+            - type: string
+            - type: 'null'
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+      required:
+        - defaults
+        - sourceFile
+        - warnings
+      additionalProperties: false
+    PrometheusText:
+      type: string
+      description: Prometheus text exposition. The live header also carries version=0.0.4 and charset=utf-8.
+    PullRequestLifecycle:
+      type: string
+      enum:
+        - open
+        - merged
+        - closed_unmerged
+    ReadyPlans:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              status:
+                type: string
+              openChildCount:
+                type: integer
+            required:
+              - id
+              - status
+              - openChildCount
+            additionalProperties: false
+      required:
+        - plans
+      additionalProperties: false
+    Readyz:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        checks:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              ok:
+                type: boolean
+              message:
+                type: string
+              hint:
+                type: string
+            required:
+              - name
+              - ok
+            additionalProperties: false
+      required:
+        - ok
+        - checks
+      additionalProperties: false
+      description: >-
+        Readiness. A failed check answers 503 with this same body; the document's success status is
+        the ready case.
+    RefreshProjectRequest:
+      type: object
+      properties:
+        ref:
+          type: string
+      additionalProperties: false
+      description: Optional. `ref` overrides the project's default branch.
+    RefreshProjectResponse:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+        headSha:
+          type: string
+        ref:
+          type: string
+      required:
+        - project
+        - headSha
+        - ref
+      additionalProperties: false
+    ResumePlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        reason:
+          type: string
+          enum:
+            - child_pr_merge_timeout
+            - parent_pr_merge_timeout
+        resumedChild:
+          anyOf:
+            - type: object
+              properties:
+                seq:
+                  type: integer
+                runId:
+                  anyOf:
+                    - type: string
+                    - type: 'null'
+              required:
+                - seq
+                - runId
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - planRun
+        - reason
+        - resumedChild
+      additionalProperties: false
+    Run:
+      type: object
+      properties:
+        id:
+          type: string
+        agentName:
+          type: string
+        projectId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        sandboxId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        sandboxRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        workerId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        seedId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        cloneKind:
+          anyOf:
+            - $ref: '#/components/schemas/CloneKind'
+            - type: 'null'
+        retryOf:
+          anyOf:
+            - type: string
+            - type: 'null'
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        renderedAgentJson: {}
+        state:
+          $ref: '#/components/schemas/RunState'
+        failureReason:
+          anyOf:
+            - $ref: '#/components/schemas/RunFailureReason'
+            - type: 'null'
+        createdAt:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        workspaceReadyAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        agentReadyAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        agentEndedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        reapedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        commitsAhead:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        filesChanged:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        insertions:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        deletions:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        prompt:
+          type: string
+        trigger:
+          type: string
+        prUrl:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prState:
+          anyOf:
+            - $ref: '#/components/schemas/PullRequestLifecycle'
+            - type: 'null'
+        prMergedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        targetBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        branch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseCommit:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseSha:
+          anyOf:
+            - type: string
+            - type: 'null'
+        provider:
+          anyOf:
+            - type: string
+            - type: 'null'
+        model:
+          anyOf:
+            - type: string
+            - type: 'null'
+        salvageRef:
+          anyOf:
+            - type: string
+            - type: 'null'
+        salvagePath:
+          anyOf:
+            - type: string
+            - type: 'null'
+        costUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        tokensInput:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensOutput:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensCacheRead:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensCacheWrite:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        previewState:
+          anyOf:
+            - $ref: '#/components/schemas/PreviewState'
+            - type: 'null'
+        previewPort:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        previewStartedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        previewLastHitAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        previewFailureMessage:
+          anyOf:
+            - type: string
+            - type: 'null'
+        costBasis:
+          $ref: '#/components/schemas/RunCostBasis'
+        maxCostUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        runtimeBackend:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - agentName
+        - projectId
+        - seedId
+        - parentRunId
+        - cloneKind
+        - retryOf
+        - mode
+        - state
+        - failureReason
+        - createdAt
+        - startedAt
+        - endedAt
+        - workspaceReadyAt
+        - agentReadyAt
+        - agentEndedAt
+        - reapedAt
+        - commitsAhead
+        - filesChanged
+        - insertions
+        - deletions
+        - prompt
+        - trigger
+        - prUrl
+        - prState
+        - prMergedAt
+        - targetBranch
+        - branch
+        - ref
+        - baseCommit
+        - baseSha
+        - provider
+        - model
+        - salvageRef
+        - costUsd
+        - tokensInput
+        - tokensOutput
+        - tokensCacheRead
+        - tokensCacheWrite
+        - previewState
+        - previewPort
+        - previewStartedAt
+        - previewLastHitAt
+        - costBasis
+      additionalProperties: false
+      description: A run row. Operator-only fields are optional because the public projection omits them.
+    RunAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            runs:
+              type: number
+            succeeded:
+              type: number
+            failed:
+              type: number
+            cancelled:
+              type: number
+            active:
+              type: number
+            successRate:
+              anyOf:
+                - type: number
+                - type: 'null'
+            prStateKnown:
+              type: number
+            prsMerged:
+              type: number
+            mergedPrRate:
+              anyOf:
+                - type: number
+                - type: 'null'
+            durationMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            queueWaitMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            contextTokens:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            tokens:
+              type: object
+              properties:
+                input:
+                  type: number
+                output:
+                  type: number
+                cacheRead:
+                  type: number
+                cacheWrite:
+                  type: number
+                total:
+                  type: number
+              required:
+                - input
+                - output
+                - cacheRead
+                - cacheWrite
+                - total
+              additionalProperties: false
+            costUsd:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            cost:
+              type: object
+              properties:
+                total:
+                  type: number
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                priced:
+                  type: number
+              required:
+                - total
+                - avg
+                - priced
+              additionalProperties: false
+          required:
+            - runs
+            - succeeded
+            - failed
+            - cancelled
+            - active
+            - successRate
+            - prStateKnown
+            - prsMerged
+            - mergedPrRate
+            - durationMs
+            - queueWaitMs
+            - contextTokens
+            - tokens
+            - costUsd
+            - cost
+          additionalProperties: false
+        delivery:
+          type: object
+          properties:
+            branchPushToPrOpenMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            prOpenToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            dispatchToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            endToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+          required:
+            - branchPushToPrOpenMs
+            - prOpenToMergeMs
+            - dispatchToMergeMs
+            - endToMergeMs
+          additionalProperties: false
+        timeSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              active:
+                type: number
+              contextTokensTotal:
+                type: number
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - active
+              - contextTokensTotal
+            additionalProperties: false
+        byAgent:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byModel:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byProvider:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byFailureReason:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+            required:
+              - key
+              - runs
+            additionalProperties: false
+        topSeedsByContext:
+          type: array
+          items:
+            type: object
+            properties:
+              seedId:
+                type: string
+              runs:
+                type: number
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - seedId
+              - runs
+              - contextTokensTotal
+              - avgContextTokens
+            additionalProperties: false
+        tokenTimeSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              input:
+                type: number
+              output:
+                type: number
+              cacheRead:
+                type: number
+              cacheWrite:
+                type: number
+              total:
+                type: number
+            required:
+              - date
+              - input
+              - output
+              - cacheRead
+              - cacheWrite
+              - total
+            additionalProperties: false
+        tokenByModelSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              series:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    input:
+                      type: number
+                    output:
+                      type: number
+                    cacheRead:
+                      type: number
+                    cacheWrite:
+                      type: number
+                    total:
+                      type: number
+                  required:
+                    - date
+                    - input
+                    - output
+                    - cacheRead
+                    - cacheWrite
+                    - total
+                  additionalProperties: false
+            required:
+              - key
+              - series
+            additionalProperties: false
+        tokenByProviderSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              series:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    input:
+                      type: number
+                    output:
+                      type: number
+                    cacheRead:
+                      type: number
+                    cacheWrite:
+                      type: number
+                    total:
+                      type: number
+                  required:
+                    - date
+                    - input
+                    - output
+                    - cacheRead
+                    - cacheWrite
+                    - total
+                  additionalProperties: false
+            required:
+              - key
+              - series
+            additionalProperties: false
+        tokens:
+          type: object
+          properties:
+            totals:
+              type: object
+              properties:
+                input:
+                  type: number
+                output:
+                  type: number
+                cacheRead:
+                  type: number
+                cacheWrite:
+                  type: number
+                total:
+                  type: number
+              required:
+                - input
+                - output
+                - cacheRead
+                - cacheWrite
+                - total
+              additionalProperties: false
+            byModel:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  tokens:
+                    type: object
+                    properties:
+                      input:
+                        type: number
+                      output:
+                        type: number
+                      cacheRead:
+                        type: number
+                      cacheWrite:
+                        type: number
+                      total:
+                        type: number
+                    required:
+                      - input
+                      - output
+                      - cacheRead
+                      - cacheWrite
+                      - total
+                    additionalProperties: false
+                required:
+                  - key
+                  - tokens
+                additionalProperties: false
+            byProvider:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  tokens:
+                    type: object
+                    properties:
+                      input:
+                        type: number
+                      output:
+                        type: number
+                      cacheRead:
+                        type: number
+                      cacheWrite:
+                        type: number
+                      total:
+                        type: number
+                    required:
+                      - input
+                      - output
+                      - cacheRead
+                      - cacheWrite
+                      - total
+                    additionalProperties: false
+                required:
+                  - key
+                  - tokens
+                additionalProperties: false
+            timeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - date
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+            byModelTimeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        input:
+                          type: number
+                        output:
+                          type: number
+                        cacheRead:
+                          type: number
+                        cacheWrite:
+                          type: number
+                        total:
+                          type: number
+                      required:
+                        - date
+                        - input
+                        - output
+                        - cacheRead
+                        - cacheWrite
+                        - total
+                      additionalProperties: false
+                required:
+                  - key
+                  - series
+                additionalProperties: false
+            byProviderTimeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        input:
+                          type: number
+                        output:
+                          type: number
+                        cacheRead:
+                          type: number
+                        cacheWrite:
+                          type: number
+                        total:
+                          type: number
+                      required:
+                        - date
+                        - input
+                        - output
+                        - cacheRead
+                        - cacheWrite
+                        - total
+                      additionalProperties: false
+                required:
+                  - key
+                  - series
+                additionalProperties: false
+          required:
+            - totals
+            - byModel
+            - byProvider
+            - timeSeries
+            - byModelTimeSeries
+            - byProviderTimeSeries
+          additionalProperties: false
+        outcomes:
+          type: object
+          properties:
+            steering:
+              type: object
+              properties:
+                steered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                unsteered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                mergedPrRateDelta:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - steered
+                - unsteered
+                - mergedPrRateDelta
+                - confidence
+              additionalProperties: false
+            costPerMergedPr:
+              type: object
+              properties:
+                overall:
+                  type: object
+                  properties:
+                    costUsd:
+                      type: number
+                    priced:
+                      type: number
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    costPerMergedPrUsd:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - costUsd
+                    - priced
+                    - prStateKnown
+                    - prsMerged
+                    - costPerMergedPrUsd
+                  additionalProperties: false
+                byAgent:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byModel:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byProvider:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - overall
+                - byAgent
+                - byModel
+                - byProvider
+                - confidence
+              additionalProperties: false
+            autonomy:
+              type: object
+              properties:
+                merged:
+                  type: number
+                autonomous:
+                  type: number
+                rate:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - merged
+                - autonomous
+                - rate
+              additionalProperties: false
+          required:
+            - steering
+            - costPerMergedPr
+            - autonomy
+          additionalProperties: false
+        capHits:
+          type: number
+      required:
+        - filter
+        - totals
+        - delivery
+        - timeSeries
+        - byAgent
+        - byModel
+        - byProvider
+        - byFailureReason
+        - topSeedsByContext
+        - tokenTimeSeries
+        - tokenByModelSeries
+        - tokenByProviderSeries
+        - tokens
+        - outcomes
+        - capHits
+      additionalProperties: false
+    RunCostBasis:
+      type: string
+      enum:
+        - api
+        - subscription_estimate
+    RunEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        runId:
+          type: string
+        seq:
+          type: integer
+        ts:
+          type: string
+        kind:
+          type: string
+        stream:
+          anyOf:
+            - $ref: '#/components/schemas/EventStream'
+            - type: 'null'
+        origin:
+          anyOf:
+            - type: string
+            - type: 'null'
+        payload:
+          description: The shape depends on `kind`.
+      required:
+        - id
+        - runId
+        - seq
+        - ts
+        - kind
+        - stream
+        - origin
+        - payload
+      additionalProperties: false
+      description: One NDJSON line. A closed tail may be empty. A live tail stays open and writes more lines.
     RunFailureReason:
       type: string
       enum:
@@ -1651,35 +5915,21 @@ components:
         - oom_killed
         - evicted
         - preempted
+    RunInbox:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/InboxMessage'
+      required:
+        - messages
+      additionalProperties: false
     RunMode:
       type: string
       enum:
         - batch
-    RunCostBasis:
-      type: string
-      enum:
-        - api
-        - subscription_estimate
-    CloneKind:
-      type: string
-      enum:
-        - replicate
-        - continue
-        - rescue
-    PreviewState:
-      type: string
-      enum:
-        - starting
-        - live
-        - failed
-        - torn-down
-    EventStream:
-      type: string
-      enum:
-        - stdout
-        - stderr
-        - system
-    PlanRunState:
+    RunState:
       type: string
       enum:
         - queued
@@ -1687,371 +5937,109 @@ components:
         - succeeded
         - failed
         - cancelled
-    PlanRunChildState:
-      type: string
-      enum:
-        - pending
-        - dispatched
-        - running
-        - pr_open
-        - merged
-        - failed
-        - skipped
-    AgentSource:
-      type: string
-      enum:
-        - builtin
-        - library
-    PullRequestLifecycle:
-      type: string
-      enum:
-        - open
-        - merged
-        - closed_unmerged
-    ErrorEnvelope:
+    SalvageRequest:
       type: object
       properties:
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            hint:
-              type: string
-          required:
-            - code
-            - message
-      required:
-        - error
-    Project:
-      type: object
-      properties:
-        id:
-          type: string
-        gitUrl:
-          type: string
-        localPath:
-          type: string
-        defaultBranch:
-          type: string
-        addedAt:
-          type: string
-        lastFetchedAt:
-          type:
-            - string
-            - 'null'
-        lastHeadSha:
-          type:
-            - string
-            - 'null'
-        hasSeeds:
-          type: boolean
-      required:
-        - id
-        - gitUrl
-        - localPath
-        - defaultBranch
-        - addedAt
-        - lastFetchedAt
-        - lastHeadSha
-        - hasSeeds
-    Agent:
-      type: object
-      properties:
-        name:
-          type: string
-        renderedJson: {}
-        registeredAt:
-          type: string
-        lastRefreshed:
-          type: string
-        description:
-          type:
-            - string
-            - 'null'
-        provider:
-          type:
-            - string
-            - 'null'
-        model:
-          type:
-            - string
-            - 'null'
-        source:
-          $ref: '#/components/schemas/AgentSource'
-      required:
-        - name
-        - registeredAt
-        - lastRefreshed
-        - description
-        - provider
-        - model
-    Run:
-      type: object
-      properties:
-        id:
-          type: string
-        agentName:
-          type: string
-        projectId:
-          type:
-            - string
-            - 'null'
-        sandboxId:
-          type:
-            - string
-            - 'null'
-        sandboxRunId:
-          type:
-            - string
-            - 'null'
-        seedId:
-          type:
-            - string
-            - 'null'
-        parentRunId:
-          type:
-            - string
-            - 'null'
-        cloneKind:
-          anyOf:
-            - $ref: '#/components/schemas/CloneKind'
-            - type: 'null'
-        mode:
-          $ref: '#/components/schemas/RunMode'
-        provider:
-          type:
-            - string
-            - 'null'
-        model:
-          type:
-            - string
-            - 'null'
-        renderedAgentJson: {}
-        state:
-          $ref: '#/components/schemas/RunState'
-        failureReason:
-          anyOf:
-            - $ref: '#/components/schemas/RunFailureReason'
-            - type: 'null'
-        createdAt:
-          type:
-            - number
-            - 'null'
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
-        commitsAhead:
-          type:
-            - integer
-            - 'null'
-        filesChanged:
-          type:
-            - integer
-            - 'null'
-        insertions:
-          type:
-            - integer
-            - 'null'
-        deletions:
-          type:
-            - integer
-            - 'null'
-        prompt:
-          type: string
+        version:
+          type: number
+          const: 1
         trigger:
-          type: string
-        prUrl:
-          type:
-            - string
-            - 'null'
-        prState:
-          anyOf:
-            - $ref: '#/components/schemas/PullRequestLifecycle'
-            - type: 'null'
-        prMergedAt:
-          type:
-            - string
-            - 'null'
-        targetBranch:
-          type:
-            - string
-            - 'null'
-        ref:
-          type:
-            - string
-            - 'null'
-        salvageRef:
-          type:
-            - string
-            - 'null'
-        salvagePath:
-          type:
-            - string
-            - 'null'
-        costUsd:
-          type:
-            - number
-            - 'null'
-        tokensInput:
-          type:
-            - integer
-            - 'null'
-        tokensOutput:
-          type:
-            - integer
-            - 'null'
-        tokensCacheRead:
-          type:
-            - integer
-            - 'null'
-        tokensCacheWrite:
-          type:
-            - integer
-            - 'null'
-        previewState:
-          anyOf:
-            - $ref: '#/components/schemas/PreviewState'
-            - type: 'null'
-        previewPort:
-          type:
-            - integer
-            - 'null'
-        previewStartedAt:
-          type:
-            - string
-            - 'null'
-        previewLastHitAt:
-          type:
-            - string
-            - 'null'
-        previewFailureMessage:
-          type:
-            - string
-            - 'null'
-        costBasis:
-          $ref: '#/components/schemas/RunCostBasis'
-      required:
-        - id
-        - agentName
-        - mode
-        - state
-        - prompt
-        - trigger
-        - costBasis
-    PlanRun:
-      type: object
-      properties:
-        id:
-          type: string
-        planId:
-          type:
-            - string
-            - 'null'
-        source:
           type: string
           enum:
-            - plan
-            - issues
-        projectId:
-          type: string
-        agentName:
-          type: string
-        promptTemplate:
-          type: string
-        ref:
-          type:
-            - string
-            - 'null'
-        providerOverride:
-          type:
-            - string
-            - 'null'
-        modelOverride:
-          type:
-            - string
-            - 'null'
-        maxCostUsd:
-          type:
-            - number
-            - 'null'
-        dispatcherHandle:
-          type: string
-        trigger:
-          type: string
-        state:
-          $ref: '#/components/schemas/PlanRunState'
-        failureReason:
-          type:
-            - string
-            - 'null'
-        createdAt:
-          type: string
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
+            - push_failed
+            - no_intent
+            - empty_push_dirty
+        rescueRef:
+          anyOf:
+            - type: string
+            - type: 'null'
+        bundleBase64:
+          anyOf:
+            - type: string
+            - type: 'null'
+        branch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        notes:
+          type: array
+          items:
+            type: string
       required:
-        - id
-        - source
-        - projectId
-        - agentName
-        - promptTemplate
-        - dispatcherHandle
+        - version
         - trigger
-        - state
-        - createdAt
-    PlanRunChild:
+      additionalProperties: {}
+      description: In-pod salvage envelope. Unknown keys are ignored. Version is 1.
+    SalvageResponse:
       type: object
       properties:
-        planRunId:
-          type: string
-        seq:
-          type: integer
-        seedId:
-          type: string
-        runId:
-          type:
-            - string
-            - 'null'
-        state:
-          $ref: '#/components/schemas/PlanRunChildState'
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
-        prMergedAt:
-          type:
-            - string
-            - 'null'
-        failureReason:
-          type:
-            - string
-            - 'null'
+        stored:
+          type: boolean
+        rescueRef:
+          anyOf:
+            - type: string
+            - type: 'null'
       required:
-        - planRunId
-        - seq
-        - seedId
-        - runId
-        - state
-        - createdAt
-        - updatedAt
+        - stored
+        - rescueRef
+      additionalProperties: false
+    SteerRunRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+        fromActor:
+          type: string
+      required:
+        - body
+      additionalProperties: false
+    SteerRunResponse:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/InboxMessage'
+      required:
+        - message
+      additionalProperties: false
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+      required:
+        - version
+      additionalProperties: false
+    Whoami:
+      type: object
+      properties:
+        identity:
+          type: string
+          enum:
+            - operator
+            - anonymous
+            - run
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum:
+              - readPublic
+              - readOperator
+              - dispatch
+              - admin
+      required:
+        - identity
+        - capabilities
+      additionalProperties: false

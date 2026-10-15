@@ -57,9 +57,31 @@ afterEach(async () => {
 	await handle.stop();
 });
 
-function call(method: string, path: string, token: string): Promise<Response> {
-	return fetch(`${base}${path}`, { method, headers: { authorization: `Bearer ${token}` } });
+function call(method: string, path: string, token: string, body?: unknown): Promise<Response> {
+	return fetch(`${base}${path}`, {
+		method,
+		headers: {
+			authorization: `Bearer ${token}`,
+			...(body !== undefined ? { "content-type": "application/json" } : {}),
+		},
+		...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+	});
 }
+
+/** Bodies that pass the published schema, so this auth test reaches the stub handler. */
+const FINALIZE_BODY = {
+	version: 1,
+	attemptId: "fin_auth",
+	result: {
+		pushed: false,
+		commitsAhead: null,
+		emptyPush: false,
+		dirty: false,
+		events: [],
+		stages: [],
+	},
+};
+const CREATE_RUN_BODY = { agent: "claude-code", project: "proj", prompt: "hello" };
 
 describe("run-scoped token — accepted on its own callback surface", () => {
 	test("GET /runs/:id/inbox for its own run", async () => {
@@ -71,7 +93,9 @@ describe("run-scoped token — accepted on its own callback surface", () => {
 	});
 
 	test("POST /runs/:id/finalize-result for its own run", async () => {
-		expect((await call("POST", `/runs/${RUN_A}/finalize-result`, scopedA)).status).toBe(200);
+		expect(
+			(await call("POST", `/runs/${RUN_A}/finalize-result`, scopedA, FINALIZE_BODY)).status,
+		).toBe(200);
 	});
 
 	// warren-5a5c: the K8s App-mode credential remint rides the same
@@ -112,7 +136,7 @@ describe("run-scoped token — bounded by run lifetime", () => {
 
 describe("operator token — unaffected", () => {
 	test("still reaches every route", async () => {
-		expect((await call("POST", "/runs", SECRET)).status).toBe(200);
+		expect((await call("POST", "/runs", SECRET, CREATE_RUN_BODY)).status).toBe(200);
 		expect((await call("DELETE", "/projects/prj_xxxxxxxxxxxx", SECRET)).status).toBe(200);
 		expect((await call("GET", "/analytics/cost", SECRET)).status).toBe(200);
 		expect((await call("GET", `/runs/${RUN_A}/inbox`, SECRET)).status).toBe(200);
