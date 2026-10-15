@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
+import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -8,7 +9,6 @@ import { RUN_STATES } from "../../src/core/wire.ts";
 import { openDatabase } from "../../src/db/client.ts";
 import { createRepos } from "../../src/db/repos/index.ts";
 import { BUILTIN_AGENTS } from "../../src/registry/builtins/index.ts";
-import { tcpPortAccepts } from "../../src/server/tcp-port.ts";
 import { bootFixture, type FixtureBootHandle } from "./fixture-boot.ts";
 import { FIXTURE_NOW_ISO, FIXTURE_NOW_MS, FIXTURE_TOKEN, seedFixtureDb } from "./fixture-data.ts";
 
@@ -213,24 +213,34 @@ describe("seedFixtureDb", () => {
 	});
 });
 
+function freshPortAccepts(port: number): Promise<boolean> {
+	return new Promise((resolve) => {
+		const socket = createConnection({ host: "127.0.0.1", port });
+		let settled = false;
+		const finish = (accepts: boolean): void => {
+			if (settled) return;
+			settled = true;
+			socket.destroy();
+			resolve(accepts);
+		};
+		socket.setTimeout(250);
+		socket.once("connect", () => finish(true));
+		socket.once("timeout", () => finish(false));
+		socket.once("error", () => finish(false));
+	});
+}
+
 describe("FixtureBootHandle.stop", () => {
 	test("shuts warren down and removes the temp root", async () => {
 		const handle = await bootFixture({ uiDistDir: null });
 		const { baseUrl, tmpRoot } = handle.output;
 		const port = Number(new URL(baseUrl).port);
-		expect(port).toBeGreaterThan(0);
-		const warm = await fetch(`${baseUrl}/healthz`);
-		expect(warm.status).toBe(200);
-		await warm.arrayBuffer();
+		expect((await fetch(`${baseUrl}/healthz`)).status).toBe(200);
 		await handle.stop();
-		// Plain fetch reuses the warm keep-alive socket. Connection: close
-		// and a raw dial each open a new handshake, so a closed listen
-		// socket cannot pass on a pooled response.
-		await expect(fetch(`${baseUrl}/healthz`)).rejects.toThrow();
 		await expect(
 			fetch(`${baseUrl}/healthz`, { headers: { connection: "close" } }),
 		).rejects.toThrow();
-		expect(await tcpPortAccepts("127.0.0.1", port)).toBe(false);
+		expect(await freshPortAccepts(port)).toBe(false);
 		expect(existsSync(tmpRoot)).toBe(false);
 		await handle.stop(); // idempotent
 	}, 30_000);

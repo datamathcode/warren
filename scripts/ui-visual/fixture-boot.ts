@@ -71,7 +71,6 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { waitUntilPortRefused } from "../../src/server/tcp-port.ts";
 import { buildSampleProject, FIXTURE_CONSTANTS } from "../acceptance/lib/fixtures.ts";
 import { type BootHandle, bootInProc } from "../acceptance/lib/inproc.ts";
 import {
@@ -168,14 +167,8 @@ export async function bootFixture(opts: FixtureBootOptions = {}): Promise<Fixtur
 	let judge: ReturnType<typeof Bun.serve> | undefined;
 	let boot: BootHandle | undefined;
 	const stop = async (): Promise<void> => {
-		const judgeServer = judge;
+		judge?.stop(true);
 		judge = undefined;
-		if (judgeServer !== undefined) {
-			const port = judgeServer.port ?? 0;
-			const hostname = judgeServer.hostname ?? "127.0.0.1";
-			await judgeServer.stop(true);
-			if (port > 0) await waitUntilPortRefused(hostname, port);
-		}
 		const b = boot;
 		boot = undefined;
 		if (b !== undefined) await b.stop();
@@ -198,7 +191,7 @@ export async function bootFixture(opts: FixtureBootOptions = {}): Promise<Fixtur
 			token: FIXTURE_TOKEN,
 			canopyRepoUrl: `https://github.com/${FIXTURE_CONSTANTS.canopyOwner}/${FIXTURE_CONSTANTS.canopyRepo}.git`,
 			serverEntry: SERVER_ENTRY,
-			bind: { host: "127.0.0.1", port: opts.port ?? 0 },
+			...(opts.port !== undefined ? { bind: { host: "127.0.0.1", port: opts.port } } : {}),
 			extraEnv: fixtureEnv(
 				await writeFixtureSdStub(tmpRoot),
 				`http://127.0.0.1:${judge.port}`,

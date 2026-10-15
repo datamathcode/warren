@@ -29,7 +29,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { tcpPortAccepts, waitUntilPortRefused } from "../../../src/server/tcp-port.ts";
 import { AcceptanceError } from "./assert.ts";
 import { waitForHealthz } from "./poll.ts";
 
@@ -86,7 +85,7 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 	}
 
 	const bind = opts.bind ?? { host: "127.0.0.1", port: pickPort() };
-	const initialUrl = bind.port === 0 ? "" : `http://${bind.host}:${bind.port}`;
+	const warrenUrl = `http://${bind.host}:${bind.port}`;
 
 	const useExplicitDbUrl = opts.dbUrl !== undefined && opts.dbUrl !== "";
 	const env: Record<string, string> = {
@@ -124,26 +123,20 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 
 	const state: ProcState = {
 		warren: undefined,
-		warrenUrl: initialUrl,
 		warrenStartCmd: () => spawnWarren(opts.serverEntry ?? "src/server/main/index.ts", env),
 	};
 
 	state.warren = state.warrenStartCmd();
-	if (bind.port === 0) {
-		state.warrenUrl = await waitForListeningUrl(state.warren, HEALTHZ_WAIT_TIMEOUT_MS);
-	}
-	await waitForHealthzWithDiagnostics(state.warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
+	await waitForHealthzWithDiagnostics(warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
 
 	return {
-		get warrenUrl() {
-			return state.warrenUrl;
-		},
+		warrenUrl,
 		token: opts.token,
 		tmpRoot,
 		dataDir,
 		env,
 		stop: async () => {
-			await stopChildAndReleasePort(state.warren, state.warrenUrl);
+			await stopChild(state.warren);
 			state.warren = undefined;
 			try {
 				await rm(tmpRoot, { recursive: true, force: true });
@@ -152,16 +145,13 @@ export async function bootInProc(opts: InProcBootOptions): Promise<BootHandle> {
 			}
 		},
 		killWarren: async () => {
-			await stopChildAndReleasePort(state.warren, state.warrenUrl);
+			await stopChild(state.warren);
 			state.warren = undefined;
 		},
 		restartWarren: async () => {
 			if (state.warren !== undefined) return;
 			state.warren = state.warrenStartCmd();
-			if (bind.port === 0) {
-				state.warrenUrl = await waitForListeningUrl(state.warren, HEALTHZ_WAIT_TIMEOUT_MS);
-			}
-			await waitForHealthzWithDiagnostics(state.warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
+			await waitForHealthzWithDiagnostics(warrenUrl, HEALTHZ_WAIT_TIMEOUT_MS, state.warren);
 		},
 	};
 }
@@ -179,26 +169,15 @@ interface SpawnedProc {
 
 interface ProcState {
 	warren: SpawnedProc | undefined;
-	warrenUrl: string;
 	warrenStartCmd: () => SpawnedProc;
 }
 
-/** Line the fixture entry prints so a port-0 bind can report the real URL. */
-export const LISTENING_LINE_PREFIX = "warren-listening ";
-
-/** Pull `warren-listening <url>` out of a child's captured stdout. */
-export function parseListeningUrl(text: string): string | undefined {
-	for (const line of text.split("\n")) {
-		const trimmed = line.trim();
-		if (!trimmed.startsWith(LISTENING_LINE_PREFIX)) continue;
-		const url = trimmed.slice(LISTENING_LINE_PREFIX.length).trim();
-		if (url.startsWith("http://") || url.startsWith("https://")) return url;
-	}
-	return undefined;
-}
-
 function spawnWarren(serverEntry: string, env: Record<string, string>): SpawnedProc {
-	return spawnCaptured(["bun", "run", serverEntry], env);
+	// `bun` on PATH may be a package-manager shim. Signaling that shim
+	// reaps the shim and leaves the real interpreter holding the port.
+	// execPath is the binary running this process. detached makes it the
+	// process-group leader so stopChild can signal the whole group.
+	return spawnCaptured([process.execPath, "run", serverEntry], env, { detached: true });
 }
 
 /**
@@ -244,7 +223,11 @@ async function drainInto(stream: ReadableStream<Uint8Array>, capture: TailCaptur
  * opts a stream back into live `inherit` passthrough. Captured output is
  * surfaced by {@link waitForHealthzWithDiagnostics} when the boot fails.
  */
-export function spawnCaptured(cmd: readonly string[], env?: Record<string, string>): SpawnedProc {
+export function spawnCaptured(
+	cmd: readonly string[],
+	env?: Record<string, string>,
+	opts?: { readonly detached?: boolean },
+): SpawnedProc {
 	const stdoutLive = process.env.WARREN_ACCEPTANCE_WARREN_STDOUT === "1";
 	const stderrLive = process.env.WARREN_ACCEPTANCE_WARREN_STDERR === "1";
 	const proc = Bun.spawn({
@@ -253,6 +236,7 @@ export function spawnCaptured(cmd: readonly string[], env?: Record<string, strin
 		stdin: "ignore",
 		stdout: stdoutLive ? "inherit" : "pipe",
 		stderr: stderrLive ? "inherit" : "pipe",
+		detached: opts?.detached === true,
 	});
 	const stdoutTail = new TailCapture();
 	const stderrTail = new TailCapture();
@@ -314,71 +298,74 @@ function renderTails(child: SpawnedProc): string {
 	return `\n${parts.join("\n\n")}`;
 }
 
-async function waitForListeningUrl(child: SpawnedProc, timeoutMs: number): Promise<string> {
-	const deadline = Date.now() + timeoutMs;
-	for (;;) {
-		const url = parseListeningUrl(child.stdoutTail.text());
-		if (url !== undefined) return url;
-		if (child.proc.exitCode !== null || child.proc.signalCode !== null) {
-			throw new AcceptanceError(
-				`warren exited before printing its listen url${describeExit(child.proc)}${renderTails(child)}`,
-			);
+const STOP_GRACE_MS = 3_000;
+
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function errorCode(err: unknown): string | undefined {
+	if (typeof err !== "object" || err === null || !("code" in err)) return undefined;
+	return typeof err.code === "string" ? err.code : undefined;
+}
+
+/** Signal the child's process group, then the pid if it is not a leader. */
+function signalGroup(pid: number, signal: NodeJS.Signals | 0): void {
+	if (pid <= 0) return;
+	try {
+		process.kill(-pid, signal);
+	} catch {
+		try {
+			process.kill(pid, signal);
+		} catch {
+			// Already gone.
 		}
+	}
+}
+
+function groupAlive(pid: number): boolean {
+	if (pid <= 0) return false;
+	try {
+		process.kill(-pid, 0);
+		return true;
+	} catch (err) {
+		if (errorCode(err) === "EPERM") return true;
+	}
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (err) {
+		return errorCode(err) === "EPERM";
+	}
+}
+
+async function waitUntilGroupGone(pid: number): Promise<void> {
+	const deadline = Date.now() + STOP_GRACE_MS;
+	while (groupAlive(pid)) {
 		if (Date.now() >= deadline) {
-			const prefix = LISTENING_LINE_PREFIX.trim();
-			throw new AcceptanceError(
-				`warren did not print ${prefix} <url> within ${timeoutMs}ms${describeExit(child.proc)}${renderTails(child)}`,
-			);
+			throw new Error(`process group ${pid} still alive after SIGKILL`);
 		}
-		await new Promise((resolve) => setTimeout(resolve, 20));
+		await delay(20);
 	}
 }
 
-async function stopChildAndReleasePort(child: SpawnedProc | undefined, url: string): Promise<void> {
-	await stopChild(child);
-	const target = hostPortFromUrl(url);
-	if (target === undefined) return;
-	if (!(await tcpPortAccepts(target.host, target.port))) return;
-	try {
-		child?.proc.kill("SIGKILL");
-	} catch {
-		// Already dead.
-	}
-	if (child !== undefined) await child.exited.catch(() => 0);
-	await waitUntilPortRefused(target.host, target.port);
-}
-
-function hostPortFromUrl(url: string): { host: string; port: number } | undefined {
-	if (url === "") return undefined;
-	try {
-		const parsed = new URL(url);
-		const port = Number(parsed.port);
-		if (!Number.isInteger(port) || port <= 0) return undefined;
-		return { host: parsed.hostname, port };
-	} catch {
-		return undefined;
-	}
-}
-
+/**
+ * SIGTERM the process group, SIGKILL it after the grace period, and
+ * return only once the group is gone. `stop()` and `killWarren()` both
+ * come through here.
+ */
 async function stopChild(child: SpawnedProc | undefined): Promise<void> {
 	if (child === undefined) return;
-	try {
-		child.proc.kill("SIGTERM");
-	} catch {
-		// Already dead.
-	}
-	const result = await Promise.race([
-		child.exited,
-		new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 3_000)),
+	const pid = child.proc.pid;
+	signalGroup(pid, "SIGTERM");
+	const exitedInGrace = await Promise.race([
+		child.exited.then(() => true),
+		delay(STOP_GRACE_MS).then(() => false),
 	]);
-	if (result === "timeout") {
-		try {
-			child.proc.kill("SIGKILL");
-		} catch {
-			// Already dead.
-		}
-		await child.exited.catch(() => 0);
-	}
+	// The direct pid can exit while a grandchild still holds the port.
+	if (!exitedInGrace || groupAlive(pid)) signalGroup(pid, "SIGKILL");
+	await child.exited.catch(() => 0);
+	await waitUntilGroupGone(pid);
 }
 
 function pickPort(): number {
