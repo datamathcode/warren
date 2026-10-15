@@ -1,0 +1,29 @@
+# Lint the generated OpenAPI document (docs/openapi.yaml).
+# The file is produced by `bun run gen:openapi` from
+# src/server/handlers/route-table.ts. Fix findings in the generator.
+# Never hand-edit the YAML. Output stays YAML. Do not emit docs.json.
+#
+# Target: valid OpenAPI 3.1 that Scalar can render as an API reference.
+# `recommended` is Redocly's ruleset for that shape (structure errors,
+# plus the warnings Scalar readers trip on: license, servers, security).
+
+extends:
+  - recommended
+
+rules:
+  # Warren is self-hosted. The server URL is the default base URL,
+  # http://localhost:8080 (DEFAULT_WARREN_BASE_URL in src/client/config.ts,
+  # and the README). There is no public production host to publish.
+  # This rule flags every localhost URL, which would push a fake host
+  # into the document. Scalar's try-it uses this server list, so the
+  # real default stays and the rule is off.
+  "no-server-example.com": off
+
+  # components.schemas publishes every enum from src/core/wire.ts so the
+  # spec cannot drift from the wire vocabulary. EventStream has no
+  # response field yet: the events routes are still untyped. The other
+  # enums are referenced from Run, Agent, and PlanRun. The test in
+  # scripts/generate-openapi.test.ts fails when a schema other than
+  # EventStream is unreferenced, so turning this rule off does not hide
+  # a new unused schema.
+  no-unused-components: off

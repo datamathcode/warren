@@ -77,6 +77,23 @@ describe("generate-docs", () => {
 		expect(routes[1]?.comment).toBeUndefined();
 	});
 
+	test("extractRoutes records the route policy when the entry declares one", () => {
+		const src = [
+			"const ROUTE_TABLE: readonly RouteEntry[] = [",
+			'\t{ method: "GET", pattern: "/healthz", policy: "anonymous", build: () => healthz() },',
+			"\t{",
+			'\t\tmethod: "POST",',
+			'\t\tpattern: "/runs",',
+			'\t\tpolicy: "dispatch",',
+			"\t\tbuild: createRunHandler,",
+			"\t},",
+			"];",
+		].join("\n");
+		const routes = extractRoutes(src);
+		expect(routes[0]?.policy).toBe("anonymous");
+		expect(routes[1]?.policy).toBe("dispatch");
+	});
+
 	test("extractRoutes throws when ROUTE_TABLE is missing", () => {
 		expect(() => extractRoutes("const SOMETHING_ELSE = [];")).toThrow(/ROUTE_TABLE/);
 	});

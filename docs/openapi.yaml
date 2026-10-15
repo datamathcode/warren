@@ -9,7 +9,16 @@ info:
     gen:openapi` to refresh; CI fails if this schema drifts from the handler module. Response
     schemas for the core documents live under `components.schemas`, with enum vocabulary derived
     from `src/core/wire.ts`; request bodies and routes without a known envelope stay permissive —
-    see docs/http-api.md for the canonical handler contracts.
+    see docs/http-api.md for the canonical handler contracts. Operations require bearerAuth unless
+    the route policy is anonymous.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: http://localhost:8080
+    description: Default warren base URL. Point a client at the instance you are calling.
+security:
+  - bearerAuth: []
 tags:
   - name: agents
     description: '`/agents` routes.'
@@ -66,8 +75,14 @@ paths:
                       $ref: '#/components/schemas/Agent'
                 required:
                   - agents
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -81,8 +96,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -102,8 +123,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -120,8 +147,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -135,8 +168,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -150,8 +189,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -165,8 +210,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -184,8 +235,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -202,8 +259,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -224,8 +287,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -242,8 +311,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -260,12 +335,19 @@ paths:
       responses:
         '200':
           description: Successful response.
-        default:
-          description: Error response (see `src/core/errors.ts`).
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          description: Any other error, including a 500 internal error. The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security: []
   /github-app/installed:
     get:
       operationId: gitHubAppInstalledHandler
@@ -275,13 +357,20 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
       description: 'warren-54c7: the manifest setup_url target — GitHub''s post-install redirect.'
+      security: []
   /github-app/register:
     get:
       operationId: registerGitHubAppHandler
@@ -291,13 +380,20 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
       description: 'warren-a647: App manifest registration; anonymous — see ./github-app.ts.'
+      security: []
   /healthz:
     get:
       operationId: healthzHandler
@@ -307,12 +403,19 @@ paths:
       responses:
         '200':
           description: Successful response.
-        default:
-          description: Error response (see `src/core/errors.ts`).
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          description: Any other error, including a 500 internal error. The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security: []
   /instance:
     get:
       operationId: instanceFactsHandler
@@ -322,8 +425,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -340,8 +449,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -355,8 +470,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -384,8 +505,14 @@ paths:
                       $ref: '#/components/schemas/PlanRun'
                 required:
                   - planRuns
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -412,8 +539,14 @@ paths:
                 required:
                   - planRun
                   - children
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -446,8 +579,14 @@ paths:
                   - planRun
                   - children
                   - runs
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -489,8 +628,14 @@ paths:
                   - planRun
                   - cancelledChild
                   - alreadyTerminal
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -510,8 +655,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -531,8 +682,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -552,8 +709,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -578,8 +741,14 @@ paths:
                       $ref: '#/components/schemas/Project'
                 required:
                   - projects
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -601,8 +770,14 @@ paths:
                     $ref: '#/components/schemas/Project'
                 required:
                   - project
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -625,8 +800,14 @@ paths:
                     $ref: '#/components/schemas/Project'
                 required:
                   - project
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -645,8 +826,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -666,8 +853,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -687,8 +880,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -712,8 +911,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -733,8 +938,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -754,8 +965,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -776,8 +993,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -802,8 +1025,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -823,8 +1052,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -849,8 +1084,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -870,8 +1111,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -913,8 +1160,14 @@ paths:
                   - offset
                   - costTotalUsd
                   - costPricedCount
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -947,8 +1200,14 @@ paths:
                 required:
                   - run
                   - sandbox
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -971,8 +1230,14 @@ paths:
                     $ref: '#/components/schemas/Run'
                 required:
                   - run
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -992,8 +1257,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1013,8 +1284,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1039,8 +1316,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1064,8 +1347,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1085,8 +1374,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1110,8 +1405,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1138,8 +1439,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1163,8 +1470,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1184,8 +1497,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1209,8 +1528,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1230,8 +1555,14 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
@@ -1239,6 +1570,7 @@ paths:
       description: >-
         warren-48f8: setup-code redemption; anonymous by necessity — the code IS the auth. 404
         unless the boot armed the handoff (src/server/setup-handoff.ts).
+      security: []
   /version:
     get:
       operationId: versionHandler
@@ -1248,12 +1580,19 @@ paths:
       responses:
         '200':
           description: Successful response.
-        default:
-          description: Error response (see `src/core/errors.ts`).
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        default:
+          description: Any other error, including a 500 internal error. The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      security: []
   /whoami:
     get:
       operationId: whoamiHandler
@@ -1263,14 +1602,25 @@ paths:
       responses:
         '200':
           description: Successful response.
+        4XX:
+          description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         default:
-          description: Error response (see `src/core/errors.ts`).
+          description: Any other error, including a 500 internal error. The body is the error envelope.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
       description: 'warren-e195: `readPublic`, not `anonymous` — an exempt route gets no actor to name.'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Operator bearer token (WARREN_API_TOKEN). Anonymous routes set security to an empty array.
   schemas:
     RunState:
       type: string
@@ -1466,14 +1816,9 @@ components:
             - string
             - 'null'
         cloneKind:
-          type:
-            - string
-            - 'null'
-          enum:
-            - replicate
-            - continue
-            - rescue
-            - null
+          anyOf:
+            - $ref: '#/components/schemas/CloneKind'
+            - type: 'null'
         mode:
           $ref: '#/components/schemas/RunMode'
         provider:
@@ -1488,29 +1833,9 @@ components:
         state:
           $ref: '#/components/schemas/RunState'
         failureReason:
-          type:
-            - string
-            - 'null'
-          enum:
-            - never_started
-            - no_model_response
-            - sandbox_failed
-            - spawn_failed
-            - crashed
-            - agent_died
-            - timed_out
-            - sandbox_run_lost
-            - sandbox_unreachable
-            - dropped_commit
-            - no_changes
-            - finalize_failed
-            - push_rejected_policy
-            - finalize_unposted
-            - provider_error
-            - oom_killed
-            - evicted
-            - preempted
-            - null
+          anyOf:
+            - $ref: '#/components/schemas/RunFailureReason'
+            - type: 'null'
         createdAt:
           type:
             - number
@@ -1548,14 +1873,9 @@ components:
             - string
             - 'null'
         prState:
-          type:
-            - string
-            - 'null'
-          enum:
-            - open
-            - merged
-            - closed_unmerged
-            - null
+          anyOf:
+            - $ref: '#/components/schemas/PullRequestLifecycle'
+            - type: 'null'
         prMergedAt:
           type:
             - string
@@ -1597,15 +1917,9 @@ components:
             - integer
             - 'null'
         previewState:
-          type:
-            - string
-            - 'null'
-          enum:
-            - starting
-            - live
-            - failed
-            - torn-down
-            - null
+          anyOf:
+            - $ref: '#/components/schemas/PreviewState'
+            - type: 'null'
         previewPort:
           type:
             - integer

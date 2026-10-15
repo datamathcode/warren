@@ -30,27 +30,24 @@
  *
  * The check mode is wired into `bun run check:all`; CI fails when the
  * route table changes but the schema isn't regenerated. Fix by running
- * `bun run gen:openapi` and committing the result.
+ * `bun run gen:openapi` and committing the result. `bun run check:openapi`
+ * then lints the generated file with Redocly (`redocly.yaml`).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { dump } from "js-yaml";
-import {
-	AGENT_SOURCES,
-	CLONE_KINDS,
-	EVENT_STREAMS,
-	PLAN_RUN_CHILD_STATES,
-	PLAN_RUN_SOURCES,
-	PLAN_RUN_STATES,
-	PREVIEW_STATES,
-	PULL_REQUEST_LIFECYCLES,
-	RUN_COST_BASES,
-	RUN_FAILURE_REASONS,
-	RUN_MODES,
-	RUN_STATES,
-} from "../src/core/wire.ts";
+import { DEFAULT_WARREN_BASE_URL } from "../src/client/config.ts";
 import { extractRoutes, type Route } from "./generate-docs.ts";
+import {
+	arrayOf,
+	buildComponentSchemas,
+	envelope,
+	type JsonSchema,
+	NULLABLE_NUMBER,
+	refSchema,
+	STRING,
+} from "./openapi-components.ts";
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const HANDLERS_PATH = resolve(REPO_ROOT, "src/server/handlers/route-table.ts");
@@ -66,12 +63,13 @@ type OpenApiParameter = {
 	schema: { type: "string" };
 };
 
-type JsonSchema = Record<string, unknown>;
-
 type OpenApiResponse = {
 	description: string;
 	content?: { "application/json": { schema: JsonSchema } };
 };
+
+/** One security requirement. An empty array on an operation means anonymous. */
+type OpenApiSecurityRequirement = Record<string, string[]>;
 
 type OpenApiOperation = {
 	operationId: string;
@@ -79,6 +77,7 @@ type OpenApiOperation = {
 	summary: string;
 	description?: string;
 	parameters?: OpenApiParameter[];
+	security?: OpenApiSecurityRequirement[];
 	responses: Record<string, OpenApiResponse>;
 };
 
@@ -86,203 +85,23 @@ type OpenApiPathItem = Partial<Record<Lowercase<Route["method"]>, OpenApiOperati
 
 type OpenApiDocument = {
 	openapi: "3.1.0";
-	info: { title: string; version: string; description: string };
+	info: {
+		title: string;
+		version: string;
+		description: string;
+		license: { name: string; identifier: string };
+	};
+	servers: { url: string; description: string }[];
+	security: OpenApiSecurityRequirement[];
 	tags: { name: string; description: string }[];
 	paths: Record<string, OpenApiPathItem>;
-	components: { schemas: Record<string, JsonSchema> };
-};
-
-/* ------------------------------------------------------------------ */
-/* Component schemas (warren-5334). Every enum is DERIVED from the     */
-/* canonical constants in `src/core/wire.ts` — never hand-spelled, so  */
-/* the published spec cannot drift from the wire vocabulary. Document  */
-/* shapes mirror the SDK row types (`src/client/types*.ts`).           */
-/* ------------------------------------------------------------------ */
-
-/** String enum schema derived from a wire.ts `as const` tuple. */
-function enumSchema(values: readonly string[]): JsonSchema {
-	return { type: "string", enum: [...values] };
-}
-
-/** Nullable variant: the enum value or JSON null. */
-function nullableEnumSchema(values: readonly string[]): JsonSchema {
-	return { type: ["string", "null"], enum: [...values, null] };
-}
-
-function refSchema(name: string): JsonSchema {
-	return { $ref: `#/components/schemas/${name}` };
-}
-
-function arrayOf(item: JsonSchema): JsonSchema {
-	return { type: "array", items: item };
-}
-
-const STRING = { type: "string" } as const;
-const NULLABLE_STRING = { type: ["string", "null"] } as const;
-const NULLABLE_NUMBER = { type: ["number", "null"] } as const;
-const NULLABLE_INTEGER = { type: ["integer", "null"] } as const;
-
-/** Required-everywhere object envelope: `{ <key>: <schema>, ... }`. */
-function envelope(properties: Record<string, JsonSchema>): JsonSchema {
-	return { type: "object", properties, required: Object.keys(properties) };
-}
-
-function buildComponentSchemas(): Record<string, JsonSchema> {
-	return {
-		RunState: enumSchema(RUN_STATES),
-		RunFailureReason: enumSchema(RUN_FAILURE_REASONS),
-		RunMode: enumSchema(RUN_MODES),
-		RunCostBasis: enumSchema(RUN_COST_BASES),
-		CloneKind: enumSchema(CLONE_KINDS),
-		PreviewState: enumSchema(PREVIEW_STATES),
-		EventStream: enumSchema(EVENT_STREAMS),
-		PlanRunState: enumSchema(PLAN_RUN_STATES),
-		PlanRunChildState: enumSchema(PLAN_RUN_CHILD_STATES),
-		AgentSource: enumSchema(AGENT_SOURCES),
-		PullRequestLifecycle: enumSchema(PULL_REQUEST_LIFECYCLES),
-		ErrorEnvelope: envelope({
-			error: {
-				type: "object",
-				properties: { code: STRING, message: STRING, hint: STRING },
-				required: ["code", "message"],
-			},
-		}),
-		Project: {
-			type: "object",
-			properties: {
-				id: STRING,
-				gitUrl: STRING,
-				localPath: STRING,
-				defaultBranch: STRING,
-				addedAt: STRING,
-				lastFetchedAt: NULLABLE_STRING,
-				lastHeadSha: NULLABLE_STRING,
-				hasSeeds: { type: "boolean" },
-			},
-			required: [
-				"id",
-				"gitUrl",
-				"localPath",
-				"defaultBranch",
-				"addedAt",
-				"lastFetchedAt",
-				"lastHeadSha",
-				"hasSeeds",
-			],
-		},
-		Agent: {
-			type: "object",
-			properties: {
-				name: STRING,
-				renderedJson: {},
-				registeredAt: STRING,
-				lastRefreshed: STRING,
-				description: NULLABLE_STRING,
-				provider: NULLABLE_STRING,
-				model: NULLABLE_STRING,
-				source: refSchema("AgentSource"),
-			},
-			required: ["name", "registeredAt", "lastRefreshed", "description", "provider", "model"],
-		},
-		Run: {
-			type: "object",
-			properties: {
-				id: STRING,
-				agentName: STRING,
-				projectId: NULLABLE_STRING,
-				sandboxId: NULLABLE_STRING,
-				sandboxRunId: NULLABLE_STRING,
-				seedId: NULLABLE_STRING,
-				parentRunId: NULLABLE_STRING,
-				cloneKind: nullableEnumSchema(CLONE_KINDS),
-				mode: refSchema("RunMode"),
-				provider: NULLABLE_STRING,
-				model: NULLABLE_STRING,
-				renderedAgentJson: {},
-				state: refSchema("RunState"),
-				failureReason: nullableEnumSchema(RUN_FAILURE_REASONS),
-				createdAt: NULLABLE_NUMBER,
-				startedAt: NULLABLE_STRING,
-				endedAt: NULLABLE_STRING,
-				commitsAhead: NULLABLE_INTEGER,
-				filesChanged: NULLABLE_INTEGER,
-				insertions: NULLABLE_INTEGER,
-				deletions: NULLABLE_INTEGER,
-				prompt: STRING,
-				trigger: STRING,
-				prUrl: NULLABLE_STRING,
-				prState: nullableEnumSchema(PULL_REQUEST_LIFECYCLES),
-				prMergedAt: NULLABLE_STRING,
-				targetBranch: NULLABLE_STRING,
-				ref: NULLABLE_STRING,
-				salvageRef: NULLABLE_STRING,
-				salvagePath: NULLABLE_STRING,
-				costUsd: NULLABLE_NUMBER,
-				tokensInput: NULLABLE_INTEGER,
-				tokensOutput: NULLABLE_INTEGER,
-				tokensCacheRead: NULLABLE_INTEGER,
-				tokensCacheWrite: NULLABLE_INTEGER,
-				previewState: nullableEnumSchema(PREVIEW_STATES),
-				previewPort: NULLABLE_INTEGER,
-				previewStartedAt: NULLABLE_STRING,
-				previewLastHitAt: NULLABLE_STRING,
-				previewFailureMessage: NULLABLE_STRING,
-				costBasis: refSchema("RunCostBasis"),
-			},
-			required: ["id", "agentName", "mode", "state", "prompt", "trigger", "costBasis"],
-		},
-		PlanRun: {
-			type: "object",
-			properties: {
-				id: STRING,
-				planId: NULLABLE_STRING,
-				source: enumSchema(PLAN_RUN_SOURCES),
-				projectId: STRING,
-				agentName: STRING,
-				promptTemplate: STRING,
-				ref: NULLABLE_STRING,
-				providerOverride: NULLABLE_STRING,
-				modelOverride: NULLABLE_STRING,
-				maxCostUsd: NULLABLE_NUMBER,
-				dispatcherHandle: STRING,
-				trigger: STRING,
-				state: refSchema("PlanRunState"),
-				failureReason: NULLABLE_STRING,
-				createdAt: STRING,
-				startedAt: NULLABLE_STRING,
-				endedAt: NULLABLE_STRING,
-			},
-			required: [
-				"id",
-				"source",
-				"projectId",
-				"agentName",
-				"promptTemplate",
-				"dispatcherHandle",
-				"trigger",
-				"state",
-				"createdAt",
-			],
-		},
-		PlanRunChild: {
-			type: "object",
-			properties: {
-				planRunId: STRING,
-				seq: { type: "integer" },
-				seedId: STRING,
-				runId: NULLABLE_STRING,
-				state: refSchema("PlanRunChildState"),
-				createdAt: STRING,
-				updatedAt: STRING,
-				startedAt: NULLABLE_STRING,
-				endedAt: NULLABLE_STRING,
-				prMergedAt: NULLABLE_STRING,
-				failureReason: NULLABLE_STRING,
-			},
-			required: ["planRunId", "seq", "seedId", "runId", "state", "createdAt", "updatedAt"],
-		},
+	components: {
+		securitySchemes: {
+			bearerAuth: { type: "http"; scheme: "bearer"; description: string };
+		};
+		schemas: Record<string, JsonSchema>;
 	};
-}
+};
 
 /**
  * Routes whose 200-response envelope the generator knows, keyed by
@@ -372,6 +191,10 @@ export function tagFor(pattern: string): string {
 	return segment;
 }
 
+function errorResponse(description: string): OpenApiResponse {
+	return { description, content: jsonContent(refSchema("ErrorEnvelope")) };
+}
+
 function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOperation {
 	const body = KNOWN_RESPONSE_BODIES[`${route.method} ${route.pattern}`];
 	const ok: OpenApiResponse = { description: "Successful response." };
@@ -382,14 +205,21 @@ function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOp
 		summary: `${route.method} ${route.pattern}`,
 		responses: {
 			"200": ok,
-			default: {
-				description: "Error response (see `src/core/errors.ts`).",
-				content: jsonContent(refSchema("ErrorEnvelope")),
-			},
+			// Range response: the route table does not list a status per
+			// failure. `src/server/errors.ts` maps client failures onto
+			// these codes, and every one of them uses the error envelope.
+			"4XX": errorResponse(
+				"Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.",
+			),
+			default: errorResponse(
+				"Any other error, including a 500 internal error. The body is the error envelope.",
+			),
 		},
 	};
 	if (route.comment) op.description = route.comment;
 	if (parameters.length > 0) op.parameters = parameters;
+	// Root security requires a bearer token. Anonymous routes opt out.
+	if (route.policy === "anonymous") op.security = [];
 	return op;
 }
 
@@ -418,6 +248,7 @@ export function buildDocument(routes: readonly Route[], version: string): OpenAp
 		if (value !== undefined) sortedPaths[key] = value;
 	}
 
+	const license = readPackageLicense();
 	return {
 		openapi: "3.1.0",
 		info: {
@@ -430,20 +261,48 @@ export function buildDocument(routes: readonly Route[], version: string): OpenAp
 				"documents live under `components.schemas`, with enum vocabulary " +
 				"derived from `src/core/wire.ts`; request bodies and routes without " +
 				"a known envelope stay permissive — see docs/http-api.md for the " +
-				"canonical handler contracts.",
+				"canonical handler contracts. Operations require bearerAuth unless " +
+				"the route policy is anonymous.",
+			license: { name: license, identifier: license },
 		},
+		servers: [
+			{
+				url: DEFAULT_WARREN_BASE_URL,
+				description: "Default warren base URL. Point a client at the instance you are calling.",
+			},
+		],
+		security: [{ bearerAuth: [] }],
 		tags,
 		paths: sortedPaths,
-		components: { schemas: buildComponentSchemas() },
+		components: {
+			securitySchemes: {
+				bearerAuth: {
+					type: "http",
+					scheme: "bearer",
+					description:
+						"Operator bearer token (WARREN_API_TOKEN). Anonymous routes set security to an empty array.",
+				},
+			},
+			schemas: buildComponentSchemas(),
+		},
 	};
 }
 
-function readPackageVersion(): string {
-	const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf8")) as { version?: unknown };
-	if (typeof pkg.version !== "string" || pkg.version.length === 0) {
-		throw new Error("package.json is missing a string `version` field.");
+function readPackageField(field: "version" | "license"): string {
+	const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf8")) as Record<string, unknown>;
+	const value = pkg[field];
+	if (typeof value !== "string" || value.length === 0) {
+		throw new Error(`package.json is missing a string \`${field}\` field.`);
 	}
-	return pkg.version;
+	return value;
+}
+
+function readPackageVersion(): string {
+	return readPackageField("version");
+}
+
+function readPackageLicense(): string {
+	return readPackageField("license");
 }
 
 export function generate(): { content: string; routeCount: number } {

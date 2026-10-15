@@ -34,6 +34,8 @@ jobs:
       - run: bun run check:agents
       - run: bun run gen:docs:check
       - run: bun run gen:openapi:check
+      # Same script check:all runs. The pinned CLI lives in that script.
+      - run: bun run check:openapi
       - run: bun run check:size
       - run: bun run check:debt
       - run: bun run check:dups
