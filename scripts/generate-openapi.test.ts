@@ -18,17 +18,18 @@ import { buildDocument, convertPattern, generate, tagFor } from "./generate-open
 const REPO_ROOT = resolve(import.meta.dir, "..");
 
 describe("generate-openapi", () => {
-	test("check:all and CI both run the Redocly lint command", () => {
+	test("check:all and CI share the pinned Redocly command", () => {
 		const pkg = JSON.parse(readFileSync(resolve(REPO_ROOT, "package.json"), "utf8")) as {
 			scripts: Record<string, string>;
 		};
-		const command = "npx @redocly/cli lint docs/openapi.yaml";
+		const command = "bunx --no-install redocly lint docs/openapi.yaml";
 		expect(pkg.scripts["check:openapi"]).toBe(command);
-		expect(pkg.scripts["check:all"]).toBe("bash scripts/check-all.sh");
+		expect(pkg.scripts["check:openapi"]).not.toContain("npx");
+		expect(pkg.scripts["check:all"]).toBe("bun run check:openapi && bash scripts/check-all.sh");
 		const ci = readFileSync(resolve(REPO_ROOT, ".github/workflows/ci.yml"), "utf8");
-		expect(ci).toContain(command);
+		expect(ci).toContain("bun run check:openapi");
+		expect(ci).not.toContain("npx @redocly/cli");
 		const entry = readFileSync(resolve(REPO_ROOT, "scripts/check-all.sh"), "utf8");
-		expect(entry).toContain("bun run check:openapi");
 		expect(entry).toContain('"$@"');
 	});
 
