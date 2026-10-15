@@ -66,12 +66,20 @@ describe("gitFixtureEnv", () => {
 		process.env.GIT_AUTHOR_NAME = "hostile-author";
 		const env = gitFixtureEnv("/tmp/warren-some-fixture/repo");
 		for (const key of Object.keys(env)) {
-			if (key === "GIT_CEILING_DIRECTORIES") continue;
+			if (
+				key === "GIT_CEILING_DIRECTORIES" ||
+				key === "GIT_CONFIG_GLOBAL" ||
+				key === "GIT_CONFIG_NOSYSTEM"
+			) {
+				continue;
+			}
 			expect(key.startsWith("GIT_")).toBe(false);
 		}
 		// The ceiling is the fixture's parent: git may find the fixture's own
 		// .git but can never chdir up past the parent into an enclosing repo.
 		expect(env.GIT_CEILING_DIRECTORIES).toBe("/tmp/warren-some-fixture");
+		expect(env.GIT_CONFIG_GLOBAL).toBe("/dev/null");
+		expect(env.GIT_CONFIG_NOSYSTEM).toBe("1");
 		expect(env.PATH).toBe(process.env.PATH);
 		delete process.env.GIT_AUTHOR_NAME;
 	});

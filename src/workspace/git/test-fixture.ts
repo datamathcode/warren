@@ -59,7 +59,9 @@ export function scrubbedGitEnv(): Record<string, string> {
  * `GIT_*` var dropped (a parent hook's GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE
  * can never redirect the call), plus GIT_CEILING_DIRECTORIES pinned to the
  * fixture's parent so `.git` discovery stops below the invoking repo no
- * matter where the fixture landed.
+ * matter where the fixture landed. Global and system git config are pinned
+ * empty so an operator's `commit.gpgsign` or `core.fsmonitor` cannot block
+ * a fixture commit.
  */
 export function gitFixtureEnv(
 	repoPath: string,
@@ -67,6 +69,13 @@ export function gitFixtureEnv(
 ): Record<string, string> {
 	const out = scrubbedGitEnv();
 	out.GIT_CEILING_DIRECTORIES = dirname(resolve(repoPath));
+	// Operator global config (commit.gpgsign, core.fsmonitor, credential
+	// insteadOf) must not apply. A signing helper or fsmonitor can block a
+	// fixture commit for its whole timeout and fail the suite (the ui-visual
+	// boot's stop test included). Callers override by passing the key in
+	// `extra`.
+	out.GIT_CONFIG_GLOBAL = "/dev/null";
+	out.GIT_CONFIG_NOSYSTEM = "1";
 	for (const [k, v] of Object.entries(extra)) {
 		if (v === undefined) delete out[k];
 		else out[k] = v;
