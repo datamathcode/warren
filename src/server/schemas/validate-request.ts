@@ -2,11 +2,14 @@
  * Request-body check for routes that publish a Zod schema.
  *
  * Starts in log-only mode: a mismatch is recorded and the handler still
- * runs. The field value and the raw body are never logged — bodies can
- * carry tokens and keys. The switch to HTTP 400 is `REQUEST_BODY_VALIDATION_MODE`.
+ * runs. The field value, the raw body, and unknown key names are never
+ * logged — a client-chosen key name can itself be a secret. An unknown
+ * key is recorded only as a count. The switch to HTTP 400 is
+ * `REQUEST_BODY_VALIDATION_MODE`.
  */
 
 import type * as z from "zod";
+import { MAX_REQUEST_BODY_BYTES } from "../request-body-limit.ts";
 import { jsonResponse } from "../response.ts";
 import type { Logger } from "../types.ts";
 import { routeContract } from "./registry.ts";
@@ -17,6 +20,8 @@ export const REQUEST_BODY_VALIDATION_MODE: "log" | "reject" = "log";
 export interface FieldIssue {
 	readonly field: string;
 	readonly errorType: string;
+	/** Set for `unrecognized_keys`. The key names are not stored. */
+	readonly unknownKeyCount?: number;
 }
 
 /**
@@ -36,7 +41,12 @@ export async function enforceRequestBody(
 	const routeLabel = `${route.method} ${route.pattern}`;
 	for (const issue of issues) {
 		logger.warn(
-			{ route: routeLabel, field: issue.field, errorType: issue.errorType },
+			{
+				route: routeLabel,
+				field: issue.field,
+				errorType: issue.errorType,
+				...(issue.unknownKeyCount !== undefined ? { unknownKeyCount: issue.unknownKeyCount } : {}),
+			},
 			"request body failed schema check",
 		);
 	}
@@ -45,6 +55,7 @@ export async function enforceRequestBody(
 }
 
 async function collectIssues(body: z.ZodType | "none", request: Request): Promise<FieldIssue[]> {
+	if (declaresOversizedBody(request)) return [{ field: "$", errorType: "too_big" }];
 	let raw: string;
 	try {
 		raw = await request.clone().text();
@@ -74,16 +85,29 @@ function issuesForAbsentBody(raw: string): FieldIssue[] {
 		return [{ field: "$", errorType: "invalid_json" }];
 	}
 	if (!isJsonObject(parsed)) return [{ field: "$", errorType: "invalid_type" }];
-	return Object.keys(parsed).map((key) => ({ field: key, errorType: "unrecognized_keys" }));
+	const count = Object.keys(parsed).length;
+	if (count === 0) return [];
+	return [{ field: "$", errorType: "unrecognized_keys", unknownKeyCount: count }];
+}
+
+/** True when Content-Length is over the server cap or is not a safe byte count. */
+function declaresOversizedBody(request: Request): boolean {
+	const raw = request.headers.get("content-length");
+	if (raw === null) return false;
+	if (!/^\d+$/.test(raw)) return true;
+	const n = Number(raw);
+	return !Number.isSafeInteger(n) || n > MAX_REQUEST_BODY_BYTES;
 }
 
 function issuesFromZod(error: z.ZodError): FieldIssue[] {
 	const issues: FieldIssue[] = [];
 	for (const issue of error.issues) {
 		if (issue.code === "unrecognized_keys") {
-			for (const key of issue.keys) {
-				issues.push({ field: joinPath([...issue.path, key]), errorType: issue.code });
-			}
+			issues.push({
+				field: joinPath(issue.path),
+				errorType: issue.code,
+				unknownKeyCount: issue.keys.length,
+			});
 			continue;
 		}
 		issues.push({ field: joinPath(issue.path), errorType: issue.code });
@@ -94,7 +118,11 @@ function issuesFromZod(error: z.ZodError): FieldIssue[] {
 function rejectionResponse(issues: readonly FieldIssue[]): Response {
 	const summary = issues
 		.slice(0, 20)
-		.map((issue) => `${issue.field} (${issue.errorType})`)
+		.map((issue) =>
+			issue.unknownKeyCount === undefined
+				? `${issue.field} (${issue.errorType})`
+				: `${issue.field} (${issue.errorType} count ${issue.unknownKeyCount})`,
+		)
 		.join(", ");
 	return jsonResponse(400, {
 		error: {

@@ -46,6 +46,13 @@ export const pullRequestLifecycleSchema = publish(
 	z.enum(PULL_REQUEST_LIFECYCLES),
 );
 
+/** Empty object. A route with `body: "none"` publishes this as its request body. */
+export const noRequestBodySchema = publish(
+	"NoRequestBody",
+	z.strictObject({}),
+	"This operation takes no JSON body. An empty body or an empty object is valid.",
+);
+
 export const errorEnvelopeSchema = publish(
 	"ErrorEnvelope",
 	z.strictObject({

@@ -405,6 +405,8 @@ export interface ServeOptions {
 	 * disables it for the whole listener.
 	 */
 	idleTimeout?: number;
+	/** Byte cap for Bun.serve `maxRequestBodySize`. Defaults to `MAX_REQUEST_BODY_BYTES`. */
+	maxRequestBodySize?: number;
 	/**
 	 * Host-match preview proxy preamble (R-19 / docs/design/preview-environments.md, warren-8a10).
 	 * Runs BEFORE auth + route match. Returns a `Response` to short-circuit

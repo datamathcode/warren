@@ -644,6 +644,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
       description: This operation takes no JSON body.
+      requestBody:
+        required: false
+        description: This operation takes no JSON body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoRequestBody'
       parameters:
         - name: id
           in: path
@@ -3224,6 +3231,11 @@ components:
     NdjsonDocument:
       type: string
       description: The proxied judge export. An unconfigured instance answers 501 JSON instead of this body.
+    NoRequestBody:
+      type: object
+      properties: {}
+      additionalProperties: false
+      description: This operation takes no JSON body. An empty body or an empty object is valid.
     OpsOverview:
       type: object
       properties:

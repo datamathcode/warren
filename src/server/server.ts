@@ -30,6 +30,7 @@ import { isRunCallbackRoute } from "../runs/spawn/run-token.ts";
 import { NO_AUTH, policyAllows } from "./auth.ts";
 import { errorLogFields, forbidden, methodNotAllowed, notFound, renderError } from "./errors.ts";
 import { buildApiRoutes, isApiPath, isAuthExempt } from "./handlers/index.ts";
+import { MAX_REQUEST_BODY_BYTES } from "./request-body-limit.ts";
 import { bindRequestIdLogger, extractOrGenerateRequestId, stampRequestId } from "./request-id.ts";
 import { jsonResponse, withSecurityHeaders } from "./response.ts";
 import { matchRoute, pathExists } from "./router.ts";
@@ -83,6 +84,7 @@ export function startServer(deps: ServerDeps, opts: ServeOptions = {}): ServeHan
 	const auth = opts.auth ?? NO_AUTH;
 	const transport = opts.transport ?? DEFAULT_TRANSPORT;
 	const idleTimeout = opts.idleTimeout ?? DEFAULT_IDLE_TIMEOUT_SECONDS;
+	const maxRequestBodySize = opts.maxRequestBodySize ?? MAX_REQUEST_BODY_BYTES;
 	const previewProxy = opts.previewProxy;
 	const runActivityCheck = opts.runActivityCheck;
 
@@ -128,8 +130,8 @@ export function startServer(deps: ServerDeps, opts: ServeOptions = {}): ServeHan
 
 	const server =
 		transport.kind === "unix"
-			? bindUnix(transport.path, fetchHandler, idleTimeout)
-			: bindTcp(transport.hostname, transport.port, fetchHandler, idleTimeout);
+			? bindUnix(transport.path, fetchHandler, idleTimeout, maxRequestBodySize)
+			: bindTcp(transport.hostname, transport.port, fetchHandler, idleTimeout, maxRequestBodySize);
 
 	const resolvedTransport: Transport =
 		transport.kind === "unix"
@@ -187,14 +189,16 @@ function bindTcp(
 	port: number,
 	fetch: (req: Request, self: ServeServer) => Promise<Response>,
 	idleTimeout: number,
+	maxRequestBodySize: number,
 ): ServeServer {
-	return Bun.serve({ hostname, port, fetch, idleTimeout });
+	return Bun.serve({ hostname, port, fetch, idleTimeout, maxRequestBodySize });
 }
 
 function bindUnix(
 	path: string,
 	fetch: (req: Request, self: ServeServer) => Promise<Response>,
 	idleTimeout: number,
+	maxRequestBodySize: number,
 ): ServeServer {
 	if (existsSync(path)) {
 		try {
@@ -207,7 +211,9 @@ function bindUnix(
 	// `idleTimeout` only on the TCP variant; Bun's runtime accepts it on
 	// the unix variant too. Double cast keeps both transports honest
 	// under the same idleTimeout policy (warren-b8fc).
-	const opts = { unix: path, fetch, idleTimeout } as unknown as Parameters<typeof Bun.serve>[0];
+	const opts = { unix: path, fetch, idleTimeout, maxRequestBodySize } as unknown as Parameters<
+		typeof Bun.serve
+	>[0];
 	return Bun.serve(opts);
 }
 

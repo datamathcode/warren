@@ -246,6 +246,22 @@ describe("generate-openapi", () => {
 		expect(routes.length).toBe(55);
 		expect(contracts.length).toBe(37);
 		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(4);
+		const doc = buildDocument(routes, "0.0.0");
+		let postRoutes = 0;
+		let postBodies = 0;
+		for (const item of Object.values(doc.paths)) {
+			if (item?.post === undefined) continue;
+			postRoutes += 1;
+			if (item.post.requestBody !== undefined) postBodies += 1;
+		}
+		expect(postRoutes).toBe(17);
+		expect(postBodies).toBe(4);
+		const cancel = doc.paths["/plan-runs/{id}/cancel"]?.post?.requestBody;
+		expect(cancel?.required).toBe(false);
+		expect(cancel?.description).toBe("This operation takes no JSON body.");
+		expect(cancel?.content["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/NoRequestBody",
+		});
 	});
 
 	test("unknown routes keep a permissive 200 with no body schema", () => {

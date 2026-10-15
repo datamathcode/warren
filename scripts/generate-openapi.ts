@@ -64,7 +64,8 @@ type OpenApiResponse = {
 };
 
 type OpenApiRequestBody = {
-	required: true;
+	required: boolean;
+	description?: string;
 	content: { "application/json": OpenApiMedia };
 };
 
@@ -182,6 +183,11 @@ function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOp
 	if (contract?.body === "none") {
 		const note = "This operation takes no JSON body.";
 		op.description = op.description === undefined ? note : `${op.description} ${note}`;
+		op.requestBody = {
+			required: false,
+			description: note,
+			content: { "application/json": { schema: componentRef("NoRequestBody") } },
+		};
 	}
 	if (parameters.length > 0) op.parameters = parameters;
 	if (contract?.bodyComponent !== undefined) {
