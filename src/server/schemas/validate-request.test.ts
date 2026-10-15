@@ -256,6 +256,43 @@ describe("enforceRequestBody", () => {
 		expect(lines).toEqual([]);
 	});
 
+	test("a record key marker stays out of logs and the 400 body", async () => {
+		const finalize = {
+			version: 1,
+			attemptId: "fin_marker",
+			result: {
+				pushed: false,
+				commitsAhead: null,
+				emptyPush: false,
+				dirty: false,
+				events: [],
+				stages: [],
+				artifacts: {
+					[KEY_NAME_MARKER]: {
+						files: [{ path: false, mergedBody: "x" }],
+						counts: { [KEY_NAME_MARKER]: "not-a-count" },
+					},
+				},
+			},
+		};
+		const salvage = {
+			version: 1,
+			trigger: "push_failed",
+			notes: { [KEY_NAME_MARKER]: "not-a-string" },
+		};
+		for (const mode of ["log", "reject"] as const) {
+			await expectMarkerHidden(
+				mode,
+				{ method: "POST", pattern: "/runs/:id/finalize-result" },
+				finalize,
+				["result.artifacts.*.files.0.path", "result.artifacts.*.counts.*"],
+			);
+			await expectMarkerHidden(mode, { method: "POST", pattern: "/runs/:id/salvage" }, salvage, [
+				"notes",
+			]);
+		}
+	});
+
 	test("skips routes that have no published body schema", async () => {
 		const { logger, lines } = makeRecordingLogger();
 		const result = await enforceRequestBody(
@@ -267,6 +304,39 @@ describe("enforceRequestBody", () => {
 		expect(lines).toEqual([]);
 	});
 });
+
+async function expectMarkerHidden(
+	mode: "log" | "reject",
+	route: { method: string; pattern: string },
+	body: unknown,
+	fields: readonly string[],
+): Promise<void> {
+	const { logger, lines } = makeRecordingLogger();
+	const result = await enforceRequestBody(
+		route,
+		new Request("http://warren.test/record-key", {
+			method: "POST",
+			body: JSON.stringify(body),
+		}),
+		logger,
+		mode,
+	);
+	expect(JSON.stringify(lines)).not.toContain(KEY_NAME_MARKER);
+	expect(JSON.stringify(lines)).not.toContain("not-a-count");
+	expect(JSON.stringify(lines)).not.toContain("not-a-string");
+	for (const field of fields) {
+		expect(lines.some((line) => line.obj.field === field)).toBe(true);
+	}
+	if (mode === "log") {
+		expect(result).toBeNull();
+		return;
+	}
+	const message = await expectRejection(result);
+	expect(message).not.toContain(KEY_NAME_MARKER);
+	expect(message).not.toContain("not-a-count");
+	expect(message).not.toContain("not-a-string");
+	for (const field of fields) expect(message).toContain(field);
+}
 
 async function expectRejection(result: Response | null): Promise<string> {
 	expect(result).not.toBeNull();
