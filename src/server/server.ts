@@ -33,6 +33,7 @@ import { buildApiRoutes, isApiPath, isAuthExempt } from "./handlers/index.ts";
 import { bindRequestIdLogger, extractOrGenerateRequestId, stampRequestId } from "./request-id.ts";
 import { jsonResponse, withSecurityHeaders } from "./response.ts";
 import { matchRoute, pathExists } from "./router.ts";
+import { enforceRequestBody } from "./schemas/index.ts";
 import type {
 	Actor,
 	AuthDenied,
@@ -294,6 +295,8 @@ async function handleRequest(
 			...(clientIp !== undefined ? { clientIp } : {}),
 			...(actor !== undefined ? { actor } : {}),
 		};
+		const rejected = await enforceRequestBody(match.route, request, logger);
+		if (rejected) return rejected;
 		try {
 			return await match.route.handler(ctx);
 		} catch (err) {

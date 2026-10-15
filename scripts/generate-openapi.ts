@@ -15,14 +15,10 @@
  *   handler symbol name are covered. The route ordering caveats encoded
  *   as `//` comments in `ROUTE_TABLE` (e.g. "must precede `/plots/:id`")
  *   are surfaced as the operation's `description`.
- * - `components.schemas` covers the core document shapes (run, plan-run,
- *   project, agent, error envelope) with every enum-typed field derived
- *   from the canonical constants in `src/core/wire.ts` (warren-5334) —
- *   the spec cannot drift from the wire vocabulary. Routes whose
- *   response envelope the generator knows carry a `$ref` body schema;
- *   the rest stay permissive `application/json` objects.
- * - Request body schemas are NOT introspected from the handler
- *   implementations — they remain out of scope.
+ * - `components.schemas` and the operation bodies come from the Zod
+ *   schemas in `src/server/schemas/`. Zod 4's JSON Schema export is the
+ *   only translator. A route with no published schema stays a permissive
+ *   success response until its batch lands.
  *
  * Modes:
  *   bun run gen:openapi          # write docs/openapi.yaml
@@ -38,16 +34,13 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { dump } from "js-yaml";
 import { DEFAULT_WARREN_BASE_URL } from "../src/client/config.ts";
-import { extractRoutes, type Route } from "./generate-docs.ts";
 import {
-	arrayOf,
-	buildComponentSchemas,
-	envelope,
+	componentRef,
 	type JsonSchema,
-	NULLABLE_NUMBER,
-	refSchema,
-	STRING,
-} from "./openapi-components.ts";
+	openApiComponents,
+	routeContract,
+} from "../src/server/schemas/index.ts";
+import { extractRoutes, type Route } from "./generate-docs.ts";
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const HANDLERS_PATH = resolve(REPO_ROOT, "src/server/handlers/route-table.ts");
@@ -63,9 +56,16 @@ type OpenApiParameter = {
 	schema: { type: "string" };
 };
 
+type OpenApiMedia = { schema: JsonSchema };
+
 type OpenApiResponse = {
 	description: string;
-	content?: { "application/json": { schema: JsonSchema } };
+	content?: { "application/json": OpenApiMedia };
+};
+
+type OpenApiRequestBody = {
+	required: true;
+	content: { "application/json": OpenApiMedia };
 };
 
 /** One security requirement. An empty array on an operation means anonymous. */
@@ -77,6 +77,7 @@ type OpenApiOperation = {
 	summary: string;
 	description?: string;
 	parameters?: OpenApiParameter[];
+	requestBody?: OpenApiRequestBody;
 	security?: OpenApiSecurityRequirement[];
 	responses: Record<string, OpenApiResponse>;
 };
@@ -101,49 +102,6 @@ type OpenApiDocument = {
 		};
 		schemas: Record<string, JsonSchema>;
 	};
-};
-
-/**
- * Routes whose 200-response envelope the generator knows, keyed by
- * `METHOD pattern`. Anything not listed keeps the permissive bare
- * description (request bodies stay out of scope entirely).
- */
-const KNOWN_RESPONSE_BODIES: Record<string, JsonSchema> = {
-	"GET /runs": envelope({
-		runs: arrayOf(refSchema("Run")),
-		total: { type: "integer" },
-		limit: { type: "integer" },
-		offset: { type: "integer" },
-		costTotalUsd: NULLABLE_NUMBER,
-		costPricedCount: { type: "integer" },
-	}),
-	"POST /runs": envelope({
-		run: refSchema("Run"),
-		sandbox: envelope({ id: STRING, workspacePath: STRING }),
-	}),
-	"GET /runs/:id": envelope({ run: refSchema("Run") }),
-	"GET /projects": envelope({ projects: arrayOf(refSchema("Project")) }),
-	"POST /projects": envelope({ project: refSchema("Project") }),
-	"GET /projects/:id": envelope({ project: refSchema("Project") }),
-	"GET /agents": envelope({ agents: arrayOf(refSchema("Agent")) }),
-	"GET /plan-runs": envelope({ planRuns: arrayOf(refSchema("PlanRun")) }),
-	"POST /plan-runs": envelope({
-		planRun: refSchema("PlanRun"),
-		children: arrayOf(refSchema("PlanRunChild")),
-	}),
-	"GET /plan-runs/:id": envelope({
-		planRun: refSchema("PlanRun"),
-		children: arrayOf(refSchema("PlanRunChild")),
-		runs: arrayOf(refSchema("Run")),
-	}),
-	"POST /plan-runs/:id/cancel": envelope({
-		planRun: refSchema("PlanRun"),
-		cancelledChild: {
-			type: ["object", "null"],
-			properties: { childSeq: { type: "integer" }, runId: STRING },
-		},
-		alreadyTerminal: { type: "boolean" },
-	}),
 };
 
 function jsonContent(schema: JsonSchema): OpenApiResponse["content"] {
@@ -192,19 +150,20 @@ export function tagFor(pattern: string): string {
 }
 
 function errorResponse(description: string): OpenApiResponse {
-	return { description, content: jsonContent(refSchema("ErrorEnvelope")) };
+	return { description, content: jsonContent(componentRef("ErrorEnvelope")) };
 }
 
 function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOperation {
-	const body = KNOWN_RESPONSE_BODIES[`${route.method} ${route.pattern}`];
+	const contract = routeContract(route.method, route.pattern);
 	const ok: OpenApiResponse = { description: "Successful response." };
-	if (body) ok.content = jsonContent(body);
+	if (contract) ok.content = jsonContent(componentRef(contract.responseComponent));
+	const successStatus = String(contract?.successStatus ?? 200);
 	const op: OpenApiOperation = {
 		operationId: route.handler,
 		tags: [tagFor(route.pattern)],
 		summary: `${route.method} ${route.pattern}`,
 		responses: {
-			"200": ok,
+			[successStatus]: ok,
 			// Range response: the route table does not list a status per
 			// failure. `src/server/errors.ts` maps client failures onto
 			// these codes, and every one of them uses the error envelope.
@@ -217,7 +176,17 @@ function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOp
 		},
 	};
 	if (route.comment) op.description = route.comment;
+	if (contract?.body === "none") {
+		const note = "This operation takes no JSON body.";
+		op.description = op.description === undefined ? note : `${op.description} ${note}`;
+	}
 	if (parameters.length > 0) op.parameters = parameters;
+	if (contract?.bodyComponent !== undefined) {
+		op.requestBody = {
+			required: true,
+			content: { "application/json": { schema: componentRef(contract.bodyComponent) } },
+		};
+	}
 	// Root security requires a bearer token. Anonymous routes opt out.
 	if (route.policy === "anonymous") op.security = [];
 	return op;
@@ -255,13 +224,11 @@ export function buildDocument(routes: readonly Route[], version: string): OpenAp
 			title: "warren HTTP API",
 			version,
 			description:
-				"Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE`. " +
-				"Run `bun run gen:openapi` to refresh; CI fails if this schema " +
-				"drifts from the handler module. Response schemas for the core " +
-				"documents live under `components.schemas`, with enum vocabulary " +
-				"derived from `src/core/wire.ts`; request bodies and routes without " +
-				"a known envelope stay permissive — see docs/http-api.md for the " +
-				"canonical handler contracts. Operations require bearerAuth unless " +
+				"Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE` " +
+				"and the Zod schemas in `src/server/schemas/`. Run `bun run gen:openapi` " +
+				"to refresh; CI fails if this schema drifts. Enum vocabulary comes " +
+				"from `src/core/wire.ts`. A route with no published schema keeps a " +
+				"permissive success response. Operations require bearerAuth unless " +
 				"the route policy is anonymous.",
 			license: { name: license, identifier: license },
 		},
@@ -283,7 +250,7 @@ export function buildDocument(routes: readonly Route[], version: string): OpenAp
 						"Operator bearer token (WARREN_API_TOKEN). Anonymous routes set security to an empty array.",
 				},
 			},
-			schemas: buildComponentSchemas(),
+			schemas: openApiComponents(),
 		},
 	};
 }

@@ -12,6 +12,7 @@ import {
 	RUN_FAILURE_REASONS,
 	RUN_STATES,
 } from "../src/core/wire.ts";
+import { definedRouteContracts } from "../src/server/schemas/index.ts";
 import { extractRoutes } from "./generate-docs.ts";
 import { buildDocument, convertPattern, generate, tagFor } from "./generate-openapi.ts";
 
@@ -153,22 +154,41 @@ describe("generate-openapi", () => {
 		});
 	});
 
-	test("known routes wire their 200 response to a component schema", () => {
+	test("known routes wire their success response to a component schema", () => {
 		const doc = buildDocument(
 			[
 				{ method: "GET", pattern: "/runs/:id", handler: "getRunHandler" },
 				{ method: "GET", pattern: "/agents", handler: "listAgentsHandler" },
+				{ method: "POST", pattern: "/runs", handler: "createRunHandler" },
+				{ method: "POST", pattern: "/projects", handler: "createProjectHandler" },
 			],
 			"0.0.0",
 		);
-		const runBody = doc.paths["/runs/{id}"]?.get?.responses["200"]?.content?.["application/json"]
-			?.schema as { properties: Record<string, unknown> };
-		expect(runBody.properties.run).toEqual({ $ref: "#/components/schemas/Run" });
-		const agentsBody = doc.paths["/agents"]?.get?.responses["200"]?.content?.["application/json"]
-			?.schema as { properties: { agents: { items: unknown } } };
-		expect(agentsBody.properties.agents.items).toEqual({
-			$ref: "#/components/schemas/Agent",
+		expect(
+			doc.paths["/runs/{id}"]?.get?.responses["200"]?.content?.["application/json"]?.schema,
+		).toEqual({ $ref: "#/components/schemas/GetRunResponse" });
+		const getRun = doc.components.schemas.GetRunResponse as {
+			properties: Record<string, unknown>;
+		};
+		expect(getRun.properties.run).toEqual({ $ref: "#/components/schemas/Run" });
+		expect(
+			doc.paths["/agents"]?.get?.responses["200"]?.content?.["application/json"]?.schema,
+		).toEqual({ $ref: "#/components/schemas/ListAgentsResponse" });
+		const agents = doc.components.schemas.ListAgentsResponse as {
+			properties: { agents: { items: unknown } };
+		};
+		expect(agents.properties.agents.items).toEqual({ $ref: "#/components/schemas/Agent" });
+		expect(
+			doc.paths["/runs"]?.post?.responses["201"]?.content?.["application/json"]?.schema,
+		).toEqual({
+			$ref: "#/components/schemas/CreateRunResponse",
 		});
+		expect(doc.paths["/runs"]?.post?.requestBody?.content["application/json"]?.schema).toEqual({
+			$ref: "#/components/schemas/CreateRunRequest",
+		});
+		expect(
+			doc.paths["/projects"]?.post?.responses["201"]?.content?.["application/json"]?.schema,
+		).toEqual({ $ref: "#/components/schemas/Project" });
 	});
 
 	test("document declares the default server, the MIT license, and bearer auth", () => {
@@ -217,6 +237,15 @@ describe("generate-openapi", () => {
 			.filter((name) => !used.has(name))
 			.sort();
 		expect(unused).toEqual(["EventStream"]);
+	});
+
+	test("typed coverage counts published response and body schemas", () => {
+		const source = readFileSync(resolve(REPO_ROOT, "src/server/handlers/route-table.ts"), "utf8");
+		const routes = extractRoutes(source);
+		const contracts = definedRouteContracts();
+		expect(routes.length).toBe(55);
+		expect(contracts.length).toBe(11);
+		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(4);
 	});
 
 	test("unknown routes keep a permissive 200 with no body schema", () => {

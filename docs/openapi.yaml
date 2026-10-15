@@ -5,12 +5,10 @@ info:
   title: warren HTTP API
   version: 0.19.3
   description: >-
-    Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE`. Run `bun run
-    gen:openapi` to refresh; CI fails if this schema drifts from the handler module. Response
-    schemas for the core documents live under `components.schemas`, with enum vocabulary derived
-    from `src/core/wire.ts`; request bodies and routes without a known envelope stay permissive —
-    see docs/http-api.md for the canonical handler contracts. Operations require bearerAuth unless
-    the route policy is anonymous.
+    Auto-generated from `src/server/handlers/route-table.ts`'s `ROUTE_TABLE` and the Zod schemas in
+    `src/server/schemas/`. Run `bun run gen:openapi` to refresh; CI fails if this schema drifts.
+    Enum vocabulary comes from `src/core/wire.ts`. A route with no published schema keeps a
+    permissive success response. Operations require bearerAuth unless the route policy is anonymous.
   license:
     name: MIT
     identifier: MIT
@@ -67,14 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  agents:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Agent'
-                required:
-                  - agents
+                $ref: '#/components/schemas/ListAgentsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -497,14 +488,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRuns:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRun'
-                required:
-                  - planRuns
+                $ref: '#/components/schemas/ListPlanRunsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -523,22 +507,12 @@ paths:
         - plan-runs
       summary: POST /plan-runs
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  children:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRunChild'
-                required:
-                  - planRun
-                  - children
+                $ref: '#/components/schemas/CreatePlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -551,6 +525,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRunRequest'
   /plan-runs/{id}:
     get:
       operationId: getPlanRunHandler
@@ -563,22 +543,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  children:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PlanRunChild'
-                  runs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Run'
-                required:
-                  - planRun
-                  - children
-                  - runs
+                $ref: '#/components/schemas/GetPlanRunDetailResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -609,25 +574,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  planRun:
-                    $ref: '#/components/schemas/PlanRun'
-                  cancelledChild:
-                    type:
-                      - object
-                      - 'null'
-                    properties:
-                      childSeq:
-                        type: integer
-                      runId:
-                        type: string
-                  alreadyTerminal:
-                    type: boolean
-                required:
-                  - planRun
-                  - cancelledChild
-                  - alreadyTerminal
+                $ref: '#/components/schemas/CancelPlanRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -640,6 +587,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      description: This operation takes no JSON body.
       parameters:
         - name: id
           in: path
@@ -733,14 +681,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  projects:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Project'
-                required:
-                  - projects
+                $ref: '#/components/schemas/ListProjectsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -759,17 +700,12 @@ paths:
         - projects
       summary: POST /projects
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  project:
-                    $ref: '#/components/schemas/Project'
-                required:
-                  - project
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -782,6 +718,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
   /projects/{id}:
     get:
       operationId: getProjectHandler
@@ -794,12 +736,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  project:
-                    $ref: '#/components/schemas/Project'
-                required:
-                  - project
+                $ref: '#/components/schemas/Project'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1135,31 +1072,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  runs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Run'
-                  total:
-                    type: integer
-                  limit:
-                    type: integer
-                  offset:
-                    type: integer
-                  costTotalUsd:
-                    type:
-                      - number
-                      - 'null'
-                  costPricedCount:
-                    type: integer
-                required:
-                  - runs
-                  - total
-                  - limit
-                  - offset
-                  - costTotalUsd
-                  - costPricedCount
+                $ref: '#/components/schemas/ListRunsResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1178,28 +1091,12 @@ paths:
         - runs
       summary: POST /runs
       responses:
-        '200':
+        '201':
           description: Successful response.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run:
-                    $ref: '#/components/schemas/Run'
-                  sandbox:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      workspacePath:
-                        type: string
-                    required:
-                      - id
-                      - workspacePath
-                required:
-                  - run
-                  - sandbox
+                $ref: '#/components/schemas/CreateRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1212,6 +1109,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunRequest'
   /runs/{id}:
     get:
       operationId: getRunHandler
@@ -1224,12 +1127,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  run:
-                    $ref: '#/components/schemas/Run'
-                required:
-                  - run
+                $ref: '#/components/schemas/GetRunResponse'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1622,7 +1520,521 @@ components:
       scheme: bearer
       description: Operator bearer token (WARREN_API_TOKEN). Anonymous routes set security to an empty array.
   schemas:
-    RunState:
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        renderedJson: {}
+        registeredAt:
+          type: string
+        lastRefreshed:
+          type: string
+        description:
+          anyOf:
+            - type: string
+            - type: 'null'
+        provider:
+          anyOf:
+            - type: string
+            - type: 'null'
+        model:
+          anyOf:
+            - type: string
+            - type: 'null'
+        source:
+          $ref: '#/components/schemas/AgentSource'
+      required:
+        - id
+        - name
+        - registeredAt
+        - lastRefreshed
+        - description
+        - provider
+        - model
+        - source
+      additionalProperties: false
+      description: An agent row. `renderedJson` is omitted for a public spectator.
+    AgentSource:
+      type: string
+      enum:
+        - builtin
+        - library
+    CancelPlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        cancelledChild:
+          anyOf:
+            - type: object
+              properties:
+                childSeq:
+                  type: integer
+                runId:
+                  type: string
+              required:
+                - childSeq
+                - runId
+              additionalProperties: false
+            - type: 'null'
+        alreadyTerminal:
+          type: boolean
+      required:
+        - planRun
+        - cancelledChild
+        - alreadyTerminal
+      additionalProperties: false
+    CloneKind:
+      type: string
+      enum:
+        - replicate
+        - continue
+        - rescue
+    CreatePlanRunRequest:
+      type: object
+      properties:
+        project:
+          type: string
+          minLength: 1
+        agent:
+          type: string
+          minLength: 1
+        planId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        issues:
+          anyOf:
+            - type: array
+              items:
+                type: string
+            - type: 'null'
+        promptTemplate:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - project
+        - agent
+      additionalProperties: false
+      description: Exactly one of `planId` or `issues` is required.
+    CreatePlanRunResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRunChild'
+      required:
+        - planRun
+        - children
+      additionalProperties: false
+    CreateProjectRequest:
+      type: object
+      properties:
+        gitUrl:
+          type: string
+          minLength: 1
+        defaultBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - gitUrl
+      additionalProperties: false
+    CreateRunRequest:
+      type: object
+      properties:
+        agent:
+          anyOf:
+            - type: string
+            - type: 'null'
+        project:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prompt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseCommit:
+          anyOf:
+            - type: string
+            - type: 'null'
+        targetBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        existingBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        trigger:
+          anyOf:
+            - type: string
+            - type: 'null'
+        seedId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+        continueFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        cloneFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        rescueFromRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: 'null'
+        mulch:
+          anyOf:
+            - type: string
+              enum:
+                - 'on'
+                - 'off'
+            - type: 'null'
+        metadata:
+          anyOf:
+            - type: object
+              properties: {}
+              additionalProperties: {}
+            - type: 'null'
+      additionalProperties: false
+      description: >-
+        Dispatch a run. `agent`, `project`, and `prompt` are required unless `cloneFromRunId` or
+        `rescueFromRunId` is set.
+    CreateRunResponse:
+      type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/Run'
+        sandbox:
+          type: object
+          properties:
+            id:
+              type: string
+            workspacePath:
+              type: string
+          required:
+            - id
+            - workspacePath
+          additionalProperties: false
+      required:
+        - run
+        - sandbox
+      additionalProperties: false
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            hint:
+              type: string
+          required:
+            - code
+            - message
+          additionalProperties: false
+      required:
+        - error
+      additionalProperties: false
+      description: Error body for every non-success response.
+    EventStream:
+      type: string
+      enum:
+        - stdout
+        - stderr
+        - system
+    GetPlanRunDetailResponse:
+      type: object
+      properties:
+        planRun:
+          $ref: '#/components/schemas/PlanRun'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRunChild'
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Run'
+      required:
+        - planRun
+        - children
+        - runs
+      additionalProperties: false
+    GetRunResponse:
+      type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/Run'
+      required:
+        - run
+      additionalProperties: false
+    ListAgentsResponse:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+      required:
+        - agents
+      additionalProperties: false
+    ListPlanRunsResponse:
+      type: object
+      properties:
+        planRuns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanRun'
+      required:
+        - planRuns
+      additionalProperties: false
+    ListProjectsResponse:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+      required:
+        - projects
+      additionalProperties: false
+    ListRunsResponse:
+      type: object
+      properties:
+        runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Run'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        costTotalUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        costPricedCount:
+          type: integer
+      required:
+        - runs
+        - total
+        - limit
+        - offset
+        - costPricedCount
+      additionalProperties: false
+    PlanRun:
+      type: object
+      properties:
+        id:
+          type: string
+        planId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        source:
+          $ref: '#/components/schemas/PlanRunSource'
+        projectId:
+          type: string
+        agentName:
+          type: string
+        promptTemplate:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        providerOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        modelOverride:
+          anyOf:
+            - type: string
+            - type: 'null'
+        maxCostUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        dispatcherHandle:
+          anyOf:
+            - type: string
+            - type: 'null'
+        trigger:
+          type: string
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        state:
+          $ref: '#/components/schemas/PlanRunState'
+        failureReason:
+          anyOf:
+            - type: string
+            - type: 'null'
+        createdAt:
+          type: string
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        resumedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - planId
+        - source
+        - projectId
+        - agentName
+        - ref
+        - trigger
+        - parentRunId
+        - state
+        - createdAt
+        - startedAt
+        - endedAt
+        - resumedAt
+      additionalProperties: false
+      description: >-
+        A plan-run row. Dispatch overrides and the prompt template are omitted for a public
+        spectator.
+    PlanRunChild:
+      type: object
+      properties:
+        planRunId:
+          type: string
+        seq:
+          type: integer
+        seedId:
+          type: string
+        runId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        state:
+          $ref: '#/components/schemas/PlanRunChildState'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prMergedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        failureReason:
+          anyOf:
+            - type: string
+            - type: 'null'
+        retryCount:
+          type: integer
+      required:
+        - planRunId
+        - seq
+        - seedId
+        - runId
+        - state
+        - createdAt
+        - updatedAt
+        - startedAt
+        - endedAt
+        - prMergedAt
+        - retryCount
+      additionalProperties: false
+      description: One child of a plan-run. `failureReason` is omitted for a public spectator.
+    PlanRunChildState:
+      type: string
+      enum:
+        - pending
+        - dispatched
+        - running
+        - pr_open
+        - merged
+        - failed
+        - skipped
+    PlanRunSource:
+      type: string
+      enum:
+        - plan
+        - issues
+    PlanRunState:
       type: string
       enum:
         - queued
@@ -1630,6 +2042,300 @@ components:
         - succeeded
         - failed
         - cancelled
+    PreviewState:
+      type: string
+      enum:
+        - starting
+        - live
+        - failed
+        - torn-down
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        gitUrl:
+          type: string
+        localPath:
+          anyOf:
+            - type: string
+            - type: 'null'
+        defaultBranch:
+          type: string
+        addedAt:
+          type: string
+        lastFetchedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        lastHeadSha:
+          anyOf:
+            - type: string
+            - type: 'null'
+        hasSeeds:
+          type: boolean
+      required:
+        - id
+        - gitUrl
+        - defaultBranch
+        - addedAt
+        - lastFetchedAt
+        - lastHeadSha
+        - hasSeeds
+      additionalProperties: false
+      description: A registered project. `localPath` is omitted for a public spectator.
+    PullRequestLifecycle:
+      type: string
+      enum:
+        - open
+        - merged
+        - closed_unmerged
+    Run:
+      type: object
+      properties:
+        id:
+          type: string
+        agentName:
+          type: string
+        projectId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        sandboxId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        sandboxRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        workerId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        seedId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        parentRunId:
+          anyOf:
+            - type: string
+            - type: 'null'
+        cloneKind:
+          anyOf:
+            - $ref: '#/components/schemas/CloneKind'
+            - type: 'null'
+        retryOf:
+          anyOf:
+            - type: string
+            - type: 'null'
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        renderedAgentJson: {}
+        state:
+          $ref: '#/components/schemas/RunState'
+        failureReason:
+          anyOf:
+            - $ref: '#/components/schemas/RunFailureReason'
+            - type: 'null'
+        createdAt:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        startedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        workspaceReadyAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        agentReadyAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        agentEndedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        reapedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        commitsAhead:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        filesChanged:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        insertions:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        deletions:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        prompt:
+          type: string
+        trigger:
+          type: string
+        prUrl:
+          anyOf:
+            - type: string
+            - type: 'null'
+        prState:
+          anyOf:
+            - $ref: '#/components/schemas/PullRequestLifecycle'
+            - type: 'null'
+        prMergedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        targetBranch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        branch:
+          anyOf:
+            - type: string
+            - type: 'null'
+        ref:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseCommit:
+          anyOf:
+            - type: string
+            - type: 'null'
+        baseSha:
+          anyOf:
+            - type: string
+            - type: 'null'
+        provider:
+          anyOf:
+            - type: string
+            - type: 'null'
+        model:
+          anyOf:
+            - type: string
+            - type: 'null'
+        salvageRef:
+          anyOf:
+            - type: string
+            - type: 'null'
+        salvagePath:
+          anyOf:
+            - type: string
+            - type: 'null'
+        costUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        tokensInput:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensOutput:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensCacheRead:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        tokensCacheWrite:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        previewState:
+          anyOf:
+            - $ref: '#/components/schemas/PreviewState'
+            - type: 'null'
+        previewPort:
+          anyOf:
+            - type: integer
+            - type: 'null'
+        previewStartedAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        previewLastHitAt:
+          anyOf:
+            - type: string
+            - type: 'null'
+        previewFailureMessage:
+          anyOf:
+            - type: string
+            - type: 'null'
+        costBasis:
+          $ref: '#/components/schemas/RunCostBasis'
+        maxCostUsd:
+          anyOf:
+            - type: number
+            - type: 'null'
+        runtimeBackend:
+          anyOf:
+            - type: string
+            - type: 'null'
+      required:
+        - id
+        - agentName
+        - projectId
+        - seedId
+        - parentRunId
+        - cloneKind
+        - retryOf
+        - mode
+        - state
+        - failureReason
+        - createdAt
+        - startedAt
+        - endedAt
+        - workspaceReadyAt
+        - agentReadyAt
+        - agentEndedAt
+        - reapedAt
+        - commitsAhead
+        - filesChanged
+        - insertions
+        - deletions
+        - prompt
+        - trigger
+        - prUrl
+        - prState
+        - prMergedAt
+        - targetBranch
+        - branch
+        - ref
+        - baseCommit
+        - baseSha
+        - provider
+        - model
+        - salvageRef
+        - costUsd
+        - tokensInput
+        - tokensOutput
+        - tokensCacheRead
+        - tokensCacheWrite
+        - previewState
+        - previewPort
+        - previewStartedAt
+        - previewLastHitAt
+        - costBasis
+      additionalProperties: false
+      description: A run row. Operator-only fields are optional because the public projection omits them.
+    RunCostBasis:
+      type: string
+      enum:
+        - api
+        - subscription_estimate
     RunFailureReason:
       type: string
       enum:
@@ -1655,31 +2361,7 @@ components:
       type: string
       enum:
         - batch
-    RunCostBasis:
-      type: string
-      enum:
-        - api
-        - subscription_estimate
-    CloneKind:
-      type: string
-      enum:
-        - replicate
-        - continue
-        - rescue
-    PreviewState:
-      type: string
-      enum:
-        - starting
-        - live
-        - failed
-        - torn-down
-    EventStream:
-      type: string
-      enum:
-        - stdout
-        - stderr
-        - system
-    PlanRunState:
+    RunState:
       type: string
       enum:
         - queued
@@ -1687,371 +2369,3 @@ components:
         - succeeded
         - failed
         - cancelled
-    PlanRunChildState:
-      type: string
-      enum:
-        - pending
-        - dispatched
-        - running
-        - pr_open
-        - merged
-        - failed
-        - skipped
-    AgentSource:
-      type: string
-      enum:
-        - builtin
-        - library
-    PullRequestLifecycle:
-      type: string
-      enum:
-        - open
-        - merged
-        - closed_unmerged
-    ErrorEnvelope:
-      type: object
-      properties:
-        error:
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            hint:
-              type: string
-          required:
-            - code
-            - message
-      required:
-        - error
-    Project:
-      type: object
-      properties:
-        id:
-          type: string
-        gitUrl:
-          type: string
-        localPath:
-          type: string
-        defaultBranch:
-          type: string
-        addedAt:
-          type: string
-        lastFetchedAt:
-          type:
-            - string
-            - 'null'
-        lastHeadSha:
-          type:
-            - string
-            - 'null'
-        hasSeeds:
-          type: boolean
-      required:
-        - id
-        - gitUrl
-        - localPath
-        - defaultBranch
-        - addedAt
-        - lastFetchedAt
-        - lastHeadSha
-        - hasSeeds
-    Agent:
-      type: object
-      properties:
-        name:
-          type: string
-        renderedJson: {}
-        registeredAt:
-          type: string
-        lastRefreshed:
-          type: string
-        description:
-          type:
-            - string
-            - 'null'
-        provider:
-          type:
-            - string
-            - 'null'
-        model:
-          type:
-            - string
-            - 'null'
-        source:
-          $ref: '#/components/schemas/AgentSource'
-      required:
-        - name
-        - registeredAt
-        - lastRefreshed
-        - description
-        - provider
-        - model
-    Run:
-      type: object
-      properties:
-        id:
-          type: string
-        agentName:
-          type: string
-        projectId:
-          type:
-            - string
-            - 'null'
-        sandboxId:
-          type:
-            - string
-            - 'null'
-        sandboxRunId:
-          type:
-            - string
-            - 'null'
-        seedId:
-          type:
-            - string
-            - 'null'
-        parentRunId:
-          type:
-            - string
-            - 'null'
-        cloneKind:
-          anyOf:
-            - $ref: '#/components/schemas/CloneKind'
-            - type: 'null'
-        mode:
-          $ref: '#/components/schemas/RunMode'
-        provider:
-          type:
-            - string
-            - 'null'
-        model:
-          type:
-            - string
-            - 'null'
-        renderedAgentJson: {}
-        state:
-          $ref: '#/components/schemas/RunState'
-        failureReason:
-          anyOf:
-            - $ref: '#/components/schemas/RunFailureReason'
-            - type: 'null'
-        createdAt:
-          type:
-            - number
-            - 'null'
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
-        commitsAhead:
-          type:
-            - integer
-            - 'null'
-        filesChanged:
-          type:
-            - integer
-            - 'null'
-        insertions:
-          type:
-            - integer
-            - 'null'
-        deletions:
-          type:
-            - integer
-            - 'null'
-        prompt:
-          type: string
-        trigger:
-          type: string
-        prUrl:
-          type:
-            - string
-            - 'null'
-        prState:
-          anyOf:
-            - $ref: '#/components/schemas/PullRequestLifecycle'
-            - type: 'null'
-        prMergedAt:
-          type:
-            - string
-            - 'null'
-        targetBranch:
-          type:
-            - string
-            - 'null'
-        ref:
-          type:
-            - string
-            - 'null'
-        salvageRef:
-          type:
-            - string
-            - 'null'
-        salvagePath:
-          type:
-            - string
-            - 'null'
-        costUsd:
-          type:
-            - number
-            - 'null'
-        tokensInput:
-          type:
-            - integer
-            - 'null'
-        tokensOutput:
-          type:
-            - integer
-            - 'null'
-        tokensCacheRead:
-          type:
-            - integer
-            - 'null'
-        tokensCacheWrite:
-          type:
-            - integer
-            - 'null'
-        previewState:
-          anyOf:
-            - $ref: '#/components/schemas/PreviewState'
-            - type: 'null'
-        previewPort:
-          type:
-            - integer
-            - 'null'
-        previewStartedAt:
-          type:
-            - string
-            - 'null'
-        previewLastHitAt:
-          type:
-            - string
-            - 'null'
-        previewFailureMessage:
-          type:
-            - string
-            - 'null'
-        costBasis:
-          $ref: '#/components/schemas/RunCostBasis'
-      required:
-        - id
-        - agentName
-        - mode
-        - state
-        - prompt
-        - trigger
-        - costBasis
-    PlanRun:
-      type: object
-      properties:
-        id:
-          type: string
-        planId:
-          type:
-            - string
-            - 'null'
-        source:
-          type: string
-          enum:
-            - plan
-            - issues
-        projectId:
-          type: string
-        agentName:
-          type: string
-        promptTemplate:
-          type: string
-        ref:
-          type:
-            - string
-            - 'null'
-        providerOverride:
-          type:
-            - string
-            - 'null'
-        modelOverride:
-          type:
-            - string
-            - 'null'
-        maxCostUsd:
-          type:
-            - number
-            - 'null'
-        dispatcherHandle:
-          type: string
-        trigger:
-          type: string
-        state:
-          $ref: '#/components/schemas/PlanRunState'
-        failureReason:
-          type:
-            - string
-            - 'null'
-        createdAt:
-          type: string
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
-      required:
-        - id
-        - source
-        - projectId
-        - agentName
-        - promptTemplate
-        - dispatcherHandle
-        - trigger
-        - state
-        - createdAt
-    PlanRunChild:
-      type: object
-      properties:
-        planRunId:
-          type: string
-        seq:
-          type: integer
-        seedId:
-          type: string
-        runId:
-          type:
-            - string
-            - 'null'
-        state:
-          $ref: '#/components/schemas/PlanRunChildState'
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-        startedAt:
-          type:
-            - string
-            - 'null'
-        endedAt:
-          type:
-            - string
-            - 'null'
-        prMergedAt:
-          type:
-            - string
-            - 'null'
-        failureReason:
-          type:
-            - string
-            - 'null'
-      required:
-        - planRunId
-        - seq
-        - seedId
-        - runId
-        - state
-        - createdAt
-        - updatedAt
