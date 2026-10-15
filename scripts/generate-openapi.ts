@@ -60,7 +60,7 @@ type OpenApiMedia = { schema: JsonSchema };
 
 type OpenApiResponse = {
 	description: string;
-	content?: { "application/json": OpenApiMedia };
+	content?: Record<string, OpenApiMedia>;
 };
 
 type OpenApiRequestBody = {
@@ -156,7 +156,10 @@ function errorResponse(description: string): OpenApiResponse {
 function buildOperation(route: Route, parameters: OpenApiParameter[]): OpenApiOperation {
 	const contract = routeContract(route.method, route.pattern);
 	const ok: OpenApiResponse = { description: "Successful response." };
-	if (contract) ok.content = jsonContent(componentRef(contract.responseComponent));
+	if (contract) {
+		const media = contract.contentType ?? "application/json";
+		ok.content = { [media]: { schema: componentRef(contract.responseComponent) } };
+	}
 	const successStatus = String(contract?.successStatus ?? 200);
 	const op: OpenApiOperation = {
 		operationId: route.handler,

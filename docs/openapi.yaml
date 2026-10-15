@@ -87,6 +87,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -138,6 +142,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BehaviorAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -159,6 +167,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -180,6 +192,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -201,6 +217,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunAnalytics'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -278,6 +298,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/x-ndjson:
+              schema:
+                $ref: '#/components/schemas/NdjsonDocument'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -302,6 +326,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgeRepos'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -326,6 +354,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -348,6 +380,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -371,6 +407,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -394,6 +434,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Healthz'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -416,6 +460,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstanceFacts'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -440,6 +488,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PrometheusText'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -461,6 +513,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpsOverview'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -657,6 +713,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewConfig'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -848,6 +908,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyPlans'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -902,6 +966,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSeedPlans'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -930,6 +998,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSeed'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -962,6 +1034,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectTriggers'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1021,6 +1097,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectWarrenConfig'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1048,6 +1128,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readyz'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1214,6 +1298,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeIntentPoll'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1303,6 +1391,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunInbox'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1453,6 +1545,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/HtmlPage'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1478,6 +1574,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1500,6 +1600,10 @@ paths:
       responses:
         '200':
           description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Whoami'
         4XX:
           description: Client error (400, 401, 403, 404, 409, 422, or 429). The body is the error envelope.
           content:
@@ -1562,6 +1666,744 @@ components:
       enum:
         - builtin
         - library
+    BehaviorAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        mining:
+          type: object
+          properties:
+            totals:
+              type: object
+              properties:
+                toolUses:
+                  type: number
+                commands:
+                  type: number
+                distinctCommands:
+                  type: number
+                failures:
+                  type: number
+                retries:
+                  type: number
+                byRuntime:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      runtime:
+                        type: string
+                      shaped:
+                        type: boolean
+                      toolUses:
+                        type: number
+                      commands:
+                        type: number
+                      unparsed:
+                        type: number
+                    required:
+                      - runtime
+                      - shaped
+                      - toolUses
+                      - commands
+                      - unparsed
+                    additionalProperties: false
+              required:
+                - toolUses
+                - commands
+                - distinctCommands
+                - failures
+                - retries
+                - byRuntime
+              additionalProperties: false
+            byFrequency:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byFailures:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byStuckScore:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            osEcoCommands:
+              type: array
+              items:
+                type: object
+                properties:
+                  command:
+                    type: string
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  osEco:
+                    type: boolean
+                  runs:
+                    type: number
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  failureRate:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  retries:
+                    type: number
+                  stuckScore:
+                    type: number
+                required:
+                  - command
+                  - category
+                  - osEco
+                  - runs
+                  - invocations
+                  - failures
+                  - failureRate
+                  - retries
+                  - stuckScore
+                additionalProperties: false
+            byCategory:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    enum:
+                      - os-eco
+                      - vcs
+                      - package
+                      - build
+                      - test
+                      - filesystem
+                      - network
+                      - other
+                  invocations:
+                    type: number
+                  failures:
+                    type: number
+                  commands:
+                    type: number
+                required:
+                  - category
+                  - invocations
+                  - failures
+                  - commands
+                additionalProperties: false
+          required:
+            - totals
+            - byFrequency
+            - byFailures
+            - byStuckScore
+            - osEcoCommands
+            - byCategory
+          additionalProperties: false
+        directories:
+          type: object
+          properties:
+            directories:
+              type: array
+              items:
+                type: object
+                properties:
+                  directory:
+                    type: string
+                  runsTouching:
+                    type: number
+                  runsFailed:
+                    type: number
+                  failureShare:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                  fileTouches:
+                    type: number
+                  errorTouches:
+                    type: number
+                  retries:
+                    type: number
+                  steeringMessages:
+                    type: number
+                  difficultyScore:
+                    type: number
+                  confidence:
+                    type: string
+                    enum:
+                      - low
+                      - medium
+                      - high
+                required:
+                  - directory
+                  - runsTouching
+                  - runsFailed
+                  - failureShare
+                  - fileTouches
+                  - errorTouches
+                  - retries
+                  - steeringMessages
+                  - difficultyScore
+                  - confidence
+                additionalProperties: false
+            totals:
+              type: object
+              properties:
+                runsInWindow:
+                  type: number
+                runsWithFilePaths:
+                  type: number
+                fileTouches:
+                  type: number
+                directoriesRanked:
+                  type: number
+                directoriesBelowMinN:
+                  type: number
+              required:
+                - runsInWindow
+                - runsWithFilePaths
+                - fileTouches
+                - directoriesRanked
+                - directoriesBelowMinN
+              additionalProperties: false
+          required:
+            - directories
+            - totals
+          additionalProperties: false
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                  - highest-context-seed
+                  - worst-success-agent
+                  - most-failed-command
+                  - most-retried-command
+                  - model-cost-outlier
+                  - steering-anomaly
+                  - steering-outcome-delta
+                  - cost-per-merged-pr
+                  - context-waste-proxy
+                  - hardest-directory
+              severity:
+                type: string
+                enum:
+                  - info
+                  - warning
+                  - critical
+              title:
+                type: string
+              detail:
+                type: string
+              value:
+                type: number
+              subject:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              denominator:
+                type: number
+              confidence:
+                type: string
+                enum:
+                  - low
+                  - medium
+                  - high
+            required:
+              - kind
+              - severity
+              - title
+              - detail
+              - value
+              - subject
+            additionalProperties: false
+        outcomes:
+          type: object
+          properties:
+            steering:
+              type: object
+              properties:
+                steered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                unsteered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                mergedPrRateDelta:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - steered
+                - unsteered
+                - mergedPrRateDelta
+                - confidence
+              additionalProperties: false
+            costPerMergedPr:
+              type: object
+              properties:
+                overall:
+                  type: object
+                  properties:
+                    costUsd:
+                      type: number
+                    priced:
+                      type: number
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    costPerMergedPrUsd:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - costUsd
+                    - priced
+                    - prStateKnown
+                    - prsMerged
+                    - costPerMergedPrUsd
+                  additionalProperties: false
+                byAgent:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byModel:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byProvider:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - overall
+                - byAgent
+                - byModel
+                - byProvider
+                - confidence
+              additionalProperties: false
+            autonomy:
+              type: object
+              properties:
+                merged:
+                  type: number
+                autonomous:
+                  type: number
+                rate:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - merged
+                - autonomous
+                - rate
+              additionalProperties: false
+          required:
+            - steering
+            - costPerMergedPr
+            - autonomy
+          additionalProperties: false
+        contextWaste:
+          type: object
+          properties:
+            runsInWindow:
+              type: number
+            runsWithRollup:
+              type: number
+            runsMeasured:
+              type: number
+            contextTokensTotal:
+              type: number
+            resultBytesTotal:
+              type: number
+            share:
+              anyOf:
+                - type: number
+                - type: 'null'
+            byTool:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  invocations:
+                    type: number
+                  resultBytesKnown:
+                    type: number
+                  resultBytesTotal:
+                    type: number
+                  runs:
+                    type: number
+                  runsMeasured:
+                    type: number
+                  contextTokensTotal:
+                    type: number
+                  share:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                required:
+                  - key
+                  - invocations
+                  - resultBytesKnown
+                  - resultBytesTotal
+                  - runs
+                  - runsMeasured
+                  - contextTokensTotal
+                  - share
+                additionalProperties: false
+            byCommand:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  invocations:
+                    type: number
+                  resultBytesKnown:
+                    type: number
+                  resultBytesTotal:
+                    type: number
+                  runs:
+                    type: number
+                  runsMeasured:
+                    type: number
+                  contextTokensTotal:
+                    type: number
+                  share:
+                    anyOf:
+                      - type: number
+                      - type: 'null'
+                required:
+                  - key
+                  - invocations
+                  - resultBytesKnown
+                  - resultBytesTotal
+                  - runs
+                  - runsMeasured
+                  - contextTokensTotal
+                  - share
+                additionalProperties: false
+            confidence:
+              type: string
+              enum:
+                - low
+                - medium
+                - high
+          required:
+            - runsInWindow
+            - runsWithRollup
+            - runsMeasured
+            - contextTokensTotal
+            - resultBytesTotal
+            - share
+            - byTool
+            - byCommand
+            - confidence
+          additionalProperties: false
+        truncated:
+          type: boolean
+      required:
+        - filter
+        - mining
+        - directories
+        - insights
+        - outcomes
+        - contextWaste
+        - truncated
+      additionalProperties: false
     CancelPlanRunResponse:
       type: object
       properties:
@@ -1593,6 +2435,214 @@ components:
         - replicate
         - continue
         - rescue
+    CostAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            runs:
+              type: number
+            priced:
+              type: number
+            costUsd:
+              type: number
+          required:
+            - runs
+            - priced
+            - costUsd
+          additionalProperties: false
+        breakdowns:
+          type: object
+          properties:
+            date:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            project:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            plan:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            run:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            agent:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            model:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+            provider:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  costUsd:
+                    type: number
+                  runs:
+                    type: number
+                  priced:
+                    type: number
+                required:
+                  - key
+                  - costUsd
+                  - runs
+                  - priced
+                additionalProperties: false
+          required:
+            - date
+            - project
+            - plan
+            - run
+            - agent
+            - model
+            - provider
+          additionalProperties: false
+        byCostBasis:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                enum:
+                  - api
+                  - subscription_estimate
+                  - unpriced
+              runs:
+                type: number
+              costUsd:
+                type: number
+            required:
+              - key
+              - runs
+              - costUsd
+            additionalProperties: false
+      required:
+        - filter
+        - totals
+        - breakdowns
+        - byCostBasis
+      additionalProperties: false
     CreatePlanRunRequest:
       type: object
       properties:
@@ -1777,6 +2827,174 @@ components:
         - run
         - sandbox
       additionalProperties: false
+    DispatchAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            dispatches:
+              type: number
+          required:
+            - dispatches
+          additionalProperties: false
+        byDispatchOrigin:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byRetryKind:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byProviderModel:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        byQueueDepth:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              count:
+                type: number
+            required:
+              - key
+              - count
+            additionalProperties: false
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              runId:
+                type: string
+              createdAt:
+                type: string
+              agentName:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              provider:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              model:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              dispatchOrigin:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              retryKind:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              queueQueuedRuns:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              queueRunningRuns:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              queueProjectNonTerminal:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              projectId:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              state:
+                $ref: '#/components/schemas/RunState'
+              failureReason:
+                anyOf:
+                  - $ref: '#/components/schemas/RunFailureReason'
+                  - type: 'null'
+              costUsd:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prState:
+                anyOf:
+                  - $ref: '#/components/schemas/PullRequestLifecycle'
+                  - type: 'null'
+            required:
+              - runId
+              - createdAt
+              - agentName
+              - provider
+              - model
+              - dispatchOrigin
+              - retryKind
+              - queueQueuedRuns
+              - queueRunningRuns
+              - queueProjectNonTerminal
+              - projectId
+              - state
+              - failureReason
+              - costUsd
+              - prState
+            additionalProperties: false
+      required:
+        - filter
+        - totals
+        - byDispatchOrigin
+        - byRetryKind
+        - byProviderModel
+        - byQueueDepth
+        - rows
+      additionalProperties: false
     ErrorEnvelope:
       type: object
       properties:
@@ -1803,6 +3021,64 @@ components:
         - stdout
         - stderr
         - system
+    FinalizeIntentPoll:
+      type: object
+      properties:
+        intent:
+          anyOf:
+            - type: object
+              properties:
+                branch:
+                  type: string
+                push:
+                  type: boolean
+                artifacts:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - branch
+                - push
+                - artifacts
+              additionalProperties: {}
+            - type: 'null'
+      required:
+        - intent
+      additionalProperties: false
+      description: The parked finalize intent, or null until reap parks one. Extra intent fields are allowed.
+    ForgeRepos:
+      type: object
+      properties:
+        supported:
+          type: boolean
+        repos:
+          type: array
+          items:
+            type: object
+            properties:
+              owner:
+                type: string
+              name:
+                type: string
+              cloneUrl:
+                type: string
+              defaultBranch:
+                type: string
+              private:
+                type: boolean
+            required:
+              - owner
+              - name
+              - cloneUrl
+              - defaultBranch
+              - private
+            additionalProperties: false
+        error:
+          type: string
+      required:
+        - supported
+        - repos
+      additionalProperties: false
     GetPlanRunDetailResponse:
       type: object
       properties:
@@ -1828,6 +3104,66 @@ components:
           $ref: '#/components/schemas/Run'
       required:
         - run
+      additionalProperties: false
+    Healthz:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          const: true
+      required:
+        - ok
+      additionalProperties: false
+    HtmlPage:
+      type: string
+      description: An HTML page. The success body is not JSON.
+    InstanceFacts:
+      type: object
+      properties:
+        version:
+          type: string
+        runtime:
+          type: string
+          enum:
+            - local
+            - k8s
+            - docker
+        authMode:
+          type: string
+          enum:
+            - token
+            - public
+        dbBackend:
+          anyOf:
+            - type: string
+              enum:
+                - sqlite
+                - postgres
+            - type: 'null'
+        uptimeSeconds:
+          type: number
+        admission:
+          anyOf:
+            - type: object
+              properties:
+                maxQueueDepth:
+                  type: number
+                maxPendingPods:
+                  type: number
+                maxProjectConcurrency:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - maxQueueDepth
+                - maxPendingPods
+                - maxProjectConcurrency
+              additionalProperties: false
+            - type: 'null'
+      required:
+        - version
+        - runtime
+        - authMode
       additionalProperties: false
     ListAgentsResponse:
       type: object
@@ -1884,6 +3220,104 @@ components:
         - limit
         - offset
         - costPricedCount
+      additionalProperties: false
+    NdjsonDocument:
+      type: string
+      description: The proxied judge export. An unconfigured instance answers 501 JSON instead of this body.
+    OpsOverview:
+      type: object
+      properties:
+        runs:
+          type: object
+          properties:
+            byState:
+              type: object
+              properties:
+                queued:
+                  type: number
+                running:
+                  type: number
+                succeeded:
+                  type: number
+                failed:
+                  type: number
+                cancelled:
+                  type: number
+              required:
+                - queued
+                - running
+                - succeeded
+                - failed
+                - cancelled
+              additionalProperties: false
+            nonTerminal:
+              type: number
+            total:
+              type: number
+          required:
+            - byState
+            - nonTerminal
+            - total
+          additionalProperties: false
+        window:
+          type: string
+          enum:
+            - 24h
+            - 7d
+            - 30d
+        spend:
+          type: object
+          properties:
+            totalUsd:
+              type: number
+            windowUsd:
+              type: number
+            windowRuns:
+              type: number
+          required:
+            - windowRuns
+          additionalProperties: false
+        delivery:
+          type: object
+          properties:
+            branchesPushed:
+              type: number
+            prsOpened:
+              type: number
+            prsMerged:
+              type: number
+          required:
+            - branchesPushed
+            - prsOpened
+            - prsMerged
+          additionalProperties: false
+        services:
+          type: object
+          properties:
+            dbReachable:
+              type: boolean
+            runtime:
+              type: string
+              enum:
+                - local
+                - k8s
+                - docker
+            lifecycleStream:
+              type: boolean
+          required:
+            - dbReachable
+            - runtime
+            - lifecycleStream
+          additionalProperties: false
+        generatedAt:
+          type: string
+      required:
+        - runs
+        - window
+        - spend
+        - delivery
+        - services
+        - generatedAt
       additionalProperties: false
     PlanRun:
       type: object
@@ -2042,6 +3476,27 @@ components:
         - succeeded
         - failed
         - cancelled
+    PreviewConfig:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - path
+            - subdomain
+        host:
+          anyOf:
+            - type: string
+            - type: 'null'
+        port:
+          anyOf:
+            - type: integer
+            - type: 'null'
+      required:
+        - mode
+        - host
+        - port
+      additionalProperties: false
     PreviewState:
       type: string
       enum:
@@ -2084,12 +3539,301 @@ components:
         - hasSeeds
       additionalProperties: false
       description: A registered project. `localPath` is omitted for a public spectator.
+    ProjectSeed:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - other
+        blockedBy:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - status
+        - blockedBy
+      additionalProperties: false
+    ProjectSeedPlans:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+                enum:
+                  - draft
+                  - approved
+                  - active
+                  - done
+              seed:
+                type: string
+              template:
+                type: string
+              revision:
+                type: number
+              name:
+                type: string
+              childCount:
+                type: integer
+              createdAt:
+                type: string
+              updatedAt:
+                type: string
+            required:
+              - id
+              - status
+              - childCount
+            additionalProperties: false
+      required:
+        - plans
+      additionalProperties: false
+    ProjectTriggers:
+      type: object
+      properties:
+        triggers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              kind:
+                type: string
+                const: cron
+              cron:
+                type: string
+              seed:
+                type: string
+              role:
+                type: string
+              timezone:
+                type: string
+              prompt:
+                type: string
+              maxCostUsd:
+                type: number
+              lastFiredAt:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              nextFireAt:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              lastRunId:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              parseError:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+            required:
+              - id
+              - kind
+              - cron
+              - role
+              - lastFiredAt
+              - nextFireAt
+              - lastRunId
+              - parseError
+            additionalProperties: false
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+      required:
+        - triggers
+        - errors
+      additionalProperties: false
+    ProjectWarrenConfig:
+      type: object
+      properties:
+        triggers:
+          anyOf:
+            - type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  kind:
+                    type: string
+                    const: cron
+                  cron:
+                    type: string
+                  seed:
+                    type: string
+                  role:
+                    type: string
+                  timezone:
+                    type: string
+                  prompt:
+                    type: string
+                  maxCostUsd:
+                    type: number
+                    exclusiveMinimum: 0
+                required:
+                  - id
+                  - kind
+                  - cron
+                  - role
+                additionalProperties: false
+            - type: 'null'
+        defaults:
+          anyOf:
+            - type: object
+              properties:
+                defaultRole:
+                  type: string
+                defaultBranch:
+                  type: string
+                defaultProvider:
+                  type: string
+                defaultModel:
+                  type: string
+                runBranchPrefix:
+                  type: string
+              additionalProperties: {}
+            - type: 'null'
+        sourceFile:
+          anyOf:
+            - type: string
+            - type: 'null'
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+              code:
+                type: string
+                enum:
+                  - warren_config_parse_error
+                  - warren_config_schema_error
+                  - warren_config_deprecated
+              message:
+                type: string
+            required:
+              - file
+              - code
+              - message
+            additionalProperties: false
+      required:
+        - defaults
+        - sourceFile
+        - warnings
+      additionalProperties: false
+    PrometheusText:
+      type: string
+      description: Prometheus text exposition. The live header also carries version=0.0.4 and charset=utf-8.
     PullRequestLifecycle:
       type: string
       enum:
         - open
         - merged
         - closed_unmerged
+    ReadyPlans:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              status:
+                type: string
+              openChildCount:
+                type: integer
+            required:
+              - id
+              - status
+              - openChildCount
+            additionalProperties: false
+      required:
+        - plans
+      additionalProperties: false
+    Readyz:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        checks:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              ok:
+                type: boolean
+              message:
+                type: string
+              hint:
+                type: string
+            required:
+              - name
+              - ok
+            additionalProperties: false
+      required:
+        - ok
+        - checks
+      additionalProperties: false
+      description: >-
+        Readiness. A failed check answers 503 with this same body; the document's success status is
+        the ready case.
     Run:
       type: object
       properties:
@@ -2331,6 +4075,1124 @@ components:
         - costBasis
       additionalProperties: false
       description: A run row. Operator-only fields are optional because the public projection omits them.
+    RunAnalytics:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            projectId:
+              anyOf:
+                - type: string
+                - type: 'null'
+            from:
+              anyOf:
+                - type: string
+                - type: 'null'
+            to:
+              anyOf:
+                - type: string
+                - type: 'null'
+          required:
+            - projectId
+            - from
+            - to
+          additionalProperties: false
+        totals:
+          type: object
+          properties:
+            runs:
+              type: number
+            succeeded:
+              type: number
+            failed:
+              type: number
+            cancelled:
+              type: number
+            active:
+              type: number
+            successRate:
+              anyOf:
+                - type: number
+                - type: 'null'
+            prStateKnown:
+              type: number
+            prsMerged:
+              type: number
+            mergedPrRate:
+              anyOf:
+                - type: number
+                - type: 'null'
+            durationMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            queueWaitMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            contextTokens:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            tokens:
+              type: object
+              properties:
+                input:
+                  type: number
+                output:
+                  type: number
+                cacheRead:
+                  type: number
+                cacheWrite:
+                  type: number
+                total:
+                  type: number
+              required:
+                - input
+                - output
+                - cacheRead
+                - cacheWrite
+                - total
+              additionalProperties: false
+            costUsd:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            cost:
+              type: object
+              properties:
+                total:
+                  type: number
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                priced:
+                  type: number
+              required:
+                - total
+                - avg
+                - priced
+              additionalProperties: false
+          required:
+            - runs
+            - succeeded
+            - failed
+            - cancelled
+            - active
+            - successRate
+            - prStateKnown
+            - prsMerged
+            - mergedPrRate
+            - durationMs
+            - queueWaitMs
+            - contextTokens
+            - tokens
+            - costUsd
+            - cost
+          additionalProperties: false
+        delivery:
+          type: object
+          properties:
+            branchPushToPrOpenMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            prOpenToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            dispatchToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+            endToMergeMs:
+              type: object
+              properties:
+                avg:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                median:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                p95:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                count:
+                  type: integer
+              required:
+                - avg
+                - median
+                - p95
+                - count
+              additionalProperties: false
+          required:
+            - branchPushToPrOpenMs
+            - prOpenToMergeMs
+            - dispatchToMergeMs
+            - endToMergeMs
+          additionalProperties: false
+        timeSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              active:
+                type: number
+              contextTokensTotal:
+                type: number
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - active
+              - contextTokensTotal
+            additionalProperties: false
+        byAgent:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byModel:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byProvider:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+              succeeded:
+                type: number
+              failed:
+                type: number
+              cancelled:
+                type: number
+              successRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              prStateKnown:
+                type: number
+              prsMerged:
+                type: number
+              mergedPrRate:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+              tokens:
+                type: object
+                properties:
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+              costUsd:
+                type: number
+              priced:
+                type: number
+              avgDurationMs:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - key
+              - runs
+              - succeeded
+              - failed
+              - cancelled
+              - successRate
+              - prStateKnown
+              - prsMerged
+              - mergedPrRate
+              - contextTokensTotal
+              - avgContextTokens
+              - tokens
+              - costUsd
+              - priced
+              - avgDurationMs
+            additionalProperties: false
+        byFailureReason:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              runs:
+                type: number
+            required:
+              - key
+              - runs
+            additionalProperties: false
+        topSeedsByContext:
+          type: array
+          items:
+            type: object
+            properties:
+              seedId:
+                type: string
+              runs:
+                type: number
+              contextTokensTotal:
+                type: number
+              avgContextTokens:
+                anyOf:
+                  - type: number
+                  - type: 'null'
+            required:
+              - seedId
+              - runs
+              - contextTokensTotal
+              - avgContextTokens
+            additionalProperties: false
+        tokenTimeSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              input:
+                type: number
+              output:
+                type: number
+              cacheRead:
+                type: number
+              cacheWrite:
+                type: number
+              total:
+                type: number
+            required:
+              - date
+              - input
+              - output
+              - cacheRead
+              - cacheWrite
+              - total
+            additionalProperties: false
+        tokenByModelSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              series:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    input:
+                      type: number
+                    output:
+                      type: number
+                    cacheRead:
+                      type: number
+                    cacheWrite:
+                      type: number
+                    total:
+                      type: number
+                  required:
+                    - date
+                    - input
+                    - output
+                    - cacheRead
+                    - cacheWrite
+                    - total
+                  additionalProperties: false
+            required:
+              - key
+              - series
+            additionalProperties: false
+        tokenByProviderSeries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              series:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    input:
+                      type: number
+                    output:
+                      type: number
+                    cacheRead:
+                      type: number
+                    cacheWrite:
+                      type: number
+                    total:
+                      type: number
+                  required:
+                    - date
+                    - input
+                    - output
+                    - cacheRead
+                    - cacheWrite
+                    - total
+                  additionalProperties: false
+            required:
+              - key
+              - series
+            additionalProperties: false
+        tokens:
+          type: object
+          properties:
+            totals:
+              type: object
+              properties:
+                input:
+                  type: number
+                output:
+                  type: number
+                cacheRead:
+                  type: number
+                cacheWrite:
+                  type: number
+                total:
+                  type: number
+              required:
+                - input
+                - output
+                - cacheRead
+                - cacheWrite
+                - total
+              additionalProperties: false
+            byModel:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  tokens:
+                    type: object
+                    properties:
+                      input:
+                        type: number
+                      output:
+                        type: number
+                      cacheRead:
+                        type: number
+                      cacheWrite:
+                        type: number
+                      total:
+                        type: number
+                    required:
+                      - input
+                      - output
+                      - cacheRead
+                      - cacheWrite
+                      - total
+                    additionalProperties: false
+                required:
+                  - key
+                  - tokens
+                additionalProperties: false
+            byProvider:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  tokens:
+                    type: object
+                    properties:
+                      input:
+                        type: number
+                      output:
+                        type: number
+                      cacheRead:
+                        type: number
+                      cacheWrite:
+                        type: number
+                      total:
+                        type: number
+                    required:
+                      - input
+                      - output
+                      - cacheRead
+                      - cacheWrite
+                      - total
+                    additionalProperties: false
+                required:
+                  - key
+                  - tokens
+                additionalProperties: false
+            timeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  input:
+                    type: number
+                  output:
+                    type: number
+                  cacheRead:
+                    type: number
+                  cacheWrite:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - date
+                  - input
+                  - output
+                  - cacheRead
+                  - cacheWrite
+                  - total
+                additionalProperties: false
+            byModelTimeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        input:
+                          type: number
+                        output:
+                          type: number
+                        cacheRead:
+                          type: number
+                        cacheWrite:
+                          type: number
+                        total:
+                          type: number
+                      required:
+                        - date
+                        - input
+                        - output
+                        - cacheRead
+                        - cacheWrite
+                        - total
+                      additionalProperties: false
+                required:
+                  - key
+                  - series
+                additionalProperties: false
+            byProviderTimeSeries:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        input:
+                          type: number
+                        output:
+                          type: number
+                        cacheRead:
+                          type: number
+                        cacheWrite:
+                          type: number
+                        total:
+                          type: number
+                      required:
+                        - date
+                        - input
+                        - output
+                        - cacheRead
+                        - cacheWrite
+                        - total
+                      additionalProperties: false
+                required:
+                  - key
+                  - series
+                additionalProperties: false
+          required:
+            - totals
+            - byModel
+            - byProvider
+            - timeSeries
+            - byModelTimeSeries
+            - byProviderTimeSeries
+          additionalProperties: false
+        outcomes:
+          type: object
+          properties:
+            steering:
+              type: object
+              properties:
+                steered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                unsteered:
+                  type: object
+                  properties:
+                    runs:
+                      type: number
+                    terminal:
+                      type: number
+                    succeeded:
+                      type: number
+                    successRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    mergedPrRate:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - runs
+                    - terminal
+                    - succeeded
+                    - successRate
+                    - prStateKnown
+                    - prsMerged
+                    - mergedPrRate
+                  additionalProperties: false
+                mergedPrRateDelta:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - steered
+                - unsteered
+                - mergedPrRateDelta
+                - confidence
+              additionalProperties: false
+            costPerMergedPr:
+              type: object
+              properties:
+                overall:
+                  type: object
+                  properties:
+                    costUsd:
+                      type: number
+                    priced:
+                      type: number
+                    prStateKnown:
+                      type: number
+                    prsMerged:
+                      type: number
+                    costPerMergedPrUsd:
+                      anyOf:
+                        - type: number
+                        - type: 'null'
+                  required:
+                    - costUsd
+                    - priced
+                    - prStateKnown
+                    - prsMerged
+                    - costPerMergedPrUsd
+                  additionalProperties: false
+                byAgent:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byModel:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                byProvider:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      costUsd:
+                        type: number
+                      priced:
+                        type: number
+                      prStateKnown:
+                        type: number
+                      prsMerged:
+                        type: number
+                      costPerMergedPrUsd:
+                        anyOf:
+                          - type: number
+                          - type: 'null'
+                    required:
+                      - key
+                      - costUsd
+                      - priced
+                      - prStateKnown
+                      - prsMerged
+                      - costPerMergedPrUsd
+                    additionalProperties: false
+                confidence:
+                  type: string
+                  enum:
+                    - low
+                    - medium
+                    - high
+              required:
+                - overall
+                - byAgent
+                - byModel
+                - byProvider
+                - confidence
+              additionalProperties: false
+            autonomy:
+              type: object
+              properties:
+                merged:
+                  type: number
+                autonomous:
+                  type: number
+                rate:
+                  anyOf:
+                    - type: number
+                    - type: 'null'
+              required:
+                - merged
+                - autonomous
+                - rate
+              additionalProperties: false
+          required:
+            - steering
+            - costPerMergedPr
+            - autonomy
+          additionalProperties: false
+        capHits:
+          type: number
+      required:
+        - filter
+        - totals
+        - delivery
+        - timeSeries
+        - byAgent
+        - byModel
+        - byProvider
+        - byFailureReason
+        - topSeedsByContext
+        - tokenTimeSeries
+        - tokenByModelSeries
+        - tokenByProviderSeries
+        - tokens
+        - outcomes
+        - capHits
+      additionalProperties: false
     RunCostBasis:
       type: string
       enum:
@@ -2357,6 +5219,56 @@ components:
         - oom_killed
         - evicted
         - preempted
+    RunInbox:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              runId:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+              body:
+                type: string
+              priority:
+                type: string
+                enum:
+                  - low
+                  - normal
+                  - high
+                  - urgent
+              fromActor:
+                type: string
+              state:
+                type: string
+                enum:
+                  - unread
+                  - delivered
+                  - failed
+              createdAt:
+                type: string
+              deliveredAt:
+                anyOf:
+                  - type: string
+                  - type: 'null'
+            required:
+              - id
+              - runId
+              - body
+              - priority
+              - fromActor
+              - state
+              - createdAt
+              - deliveredAt
+            additionalProperties: false
+      required:
+        - messages
+      additionalProperties: false
     RunMode:
       type: string
       enum:
@@ -2369,3 +5281,33 @@ components:
         - succeeded
         - failed
         - cancelled
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+      required:
+        - version
+      additionalProperties: false
+    Whoami:
+      type: object
+      properties:
+        identity:
+          type: string
+          enum:
+            - operator
+            - anonymous
+            - run
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum:
+              - readPublic
+              - readOperator
+              - dispatch
+              - admin
+      required:
+        - identity
+        - capabilities
+      additionalProperties: false

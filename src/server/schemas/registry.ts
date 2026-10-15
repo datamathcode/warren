@@ -24,6 +24,8 @@ export interface RouteContract {
 	/** A Zod schema, `"none"` when the route takes no JSON body, or omitted for reads. */
 	readonly body?: z.ZodType | "none";
 	readonly bodyComponent?: string;
+	/** Success media type. JSON when omitted. */
+	readonly contentType?: string;
 }
 
 /** Publish `schema` as a named component. Returns the tagged schema to compose with. */
@@ -47,6 +49,7 @@ export function defineRoute(
 		readonly body?: z.ZodType | "none";
 		readonly bodyComponent?: string;
 		readonly bodyDescription?: string;
+		readonly contentType?: string;
 	},
 ): RouteContract {
 	const key = `${method} ${pattern}`;
@@ -72,6 +75,7 @@ export function defineRoute(
 		responseComponent: input.responseComponent,
 		...(body !== undefined ? { body } : {}),
 		...(bodyComponent !== undefined ? { bodyComponent } : {}),
+		...(input.contentType !== undefined ? { contentType: input.contentType } : {}),
 	};
 	routes.set(key, contract);
 	return contract;

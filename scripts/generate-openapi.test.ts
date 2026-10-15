@@ -244,7 +244,7 @@ describe("generate-openapi", () => {
 		const routes = extractRoutes(source);
 		const contracts = definedRouteContracts();
 		expect(routes.length).toBe(55);
-		expect(contracts.length).toBe(11);
+		expect(contracts.length).toBe(37);
 		expect(contracts.filter((contract) => contract.body !== undefined).length).toBe(4);
 	});
 

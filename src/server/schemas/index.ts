@@ -4,6 +4,8 @@
  */
 import "./components.ts";
 import "./routes-core.ts";
+import "./routes-reads.ts";
+import "./routes-reads-analytics.ts";
 
 export {
 	componentRef,
