@@ -1,6 +1,10 @@
-# Runs warren's full local gate (`bun run check:all`, scripts/check-all.ts)
-# as one job on pull requests, so a PR gets the same 12 gates that a
-# developer runs on their machine.
+# Runs warren's full local gate (`bun run check:all`,
+# scripts/check-all.ts, all 12 gates) where ci.yml does not:
+#   - on pull requests whose base is NOT main (stacked PRs; ci.yml runs
+#     only on PRs to main and already runs all 12 gates there), and
+#   - on manual dispatch.
+# On pull requests to main the job is skipped, so it does not repeat
+# ci.yml.
 #
 # DMC Labs addition. This file does not exist in the upstream repo
 # (jayminwest/warren). Its name does not start with "ci", so
@@ -12,7 +16,6 @@ name: check-all
 
 on:
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +27,7 @@ concurrency:
 
 jobs:
   check-all:
+    if: github.event_name == 'workflow_dispatch' || github.base_ref != 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
